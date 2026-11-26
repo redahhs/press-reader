@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>方案 D · 夜间书房</title>
+<style>
+/* ============================================================
+   方案 D —「夜间书房」Night Desk
+   核心：把文章切成可消化的卡片，右栏常驻本篇词汇。翻译是卡片的一部分，
+   不是页面的第二套内容。适合夜间 / 屏幕阅读 / 想随时知道「这篇有几个词没拿下」。
+   ============================================================ */
+:root{
+  --bg:#131110;
+  --bg-2:#191613;
+  --card:#1d1a16;
+  --card-2:#232019;
+  --ink:#eae2d3;
+  --ink-2:#b3a894;
+  --ink-3:#8b8172;
+  --line:#2c2820;
+  --line-2:#3a342a;
+  --amber:#e0a45c;
+  --amber-soft:#3a2a18;
+  --serif:"Iowan Old Style",Charter,"Sitka Text",Georgia,"Songti SC",serif;
+  --sans:"Segoe UI","PingFang SC","Microsoft YaHei UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans);
+  background-image:radial-gradient(ellipse at 15% -10%, rgba(224,164,92,.07), transparent 55%);}
+.badge{
+  position:fixed; right:14px; bottom:14px; z-index:80;
+  font-size:11px; letter-spacing:1.4px; text-transform:uppercase;
+  background:var(--amber); color:#1a1611; padding:7px 11px; border-radius:99px; font-weight:600;
+}
+
+/* ---------- 顶栏 ---------- */
+.topbar{
+  position:sticky; top:0; z-index:40; backdrop-filter:blur(14px);
+  background:rgba(19,17,16,.86); border-bottom:1px solid var(--line);
+}
+.topbar-in{max-width:1120px; margin:0 auto; padding:14px 32px; display:flex; align-items:center; gap:18px}
+.tb-k{font-size:10px; letter-spacing:2.8px; text-transform:uppercase; color:var(--amber); font-weight:700}
+.tb-t{font-size:13.5px; color:var(--ink-2); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.tb-t b{color:var(--ink); font-weight:600}
+.pill{
+  font-size:11.5px; padding:5px 11px; border:1px solid var(--line-2); border-radius:99px;
+  color:var(--ink-2); background:var(--card);
+}
+.progress{position:absolute; left:0; right:0; bottom:-1px; height:2px; background:transparent}
+.progress i{display:block; height:100%; width:12%; background:var(--amber); transition:width .3s}
+
+/* ---------- 布局 ---------- */
+.shell{max-width:1120px; margin:0 auto; padding:34px 32px 140px; display:grid;
+  grid-template-columns:minmax(0,1fr) 268px; column-gap:44px; align-items:start}
+.col-main{min-width:0}
+
+/* ---------- 标题 ---------- */
+.head{margin-bottom:26px}
+.head .k{font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--ink-3)}
+.head h1{font-family:var(--serif); font-size:clamp(26px,3.4vw,40px); line-height:1.2;
+  letter-spacing:-.012em; margin:12px 0 0; font-weight:600; text-wrap:balance}
+.head .m{display:flex; gap:14px; flex-wrap:wrap; margin-top:14px; font-size:11.5px; color:var(--ink-3)}
+.head .m b{color:var(--ink-2); font-weight:600}
+
+/* ---------- 段落卡 ---------- */
+.card{
+  background:var(--card); border:1px solid var(--line); border-radius:14px;
+  padding:20px 22px 14px; margin-bottom:14px; position:relative;
+  transition:border-color .18s, transform .18s;
+}
+.card:hover{border-color:var(--line-2)}
+.card.flash{border-color:var(--amber); box-shadow:0 0 0 1px var(--amber-soft)}
+.card .no{
+  position:absolute; left:-30px; top:22px; font-size:11px; color:var(--ink-3);
+  font-variant-numeric:tabular-nums; letter-spacing:.5px;
+}
+.card .en{font-family:var(--serif); font-size:18px; line-height:1.78; color:var(--ink); hyphens:auto}
+.card .en p{margin:0}
+.card .tr{display:none; margin-top:16px; padding-top:14px; border-top:1px dashed var(--line-2);
+  font-size:13.5px; line-height:1.95; color:var(--ink-2); letter-spacing:.01em}
+.card.open .tr{display:block; animation:fade .18s ease}
+@keyframes fade{from{opacity:0;transform:translateY(-2px)}to{opacity:1;transform:none}}
+.card .foot{display:flex; align-items:center; gap:8px; margin-top:14px; flex-wrap:wrap}
+.chip{
+  font-size:11px; padding:3px 9px; border-radius:7px; border:1px solid var(--line-2);
+  background:var(--card-2); color:var(--ink-2); cursor:pointer; transition:all .14s; white-space:nowrap;
+}
+.chip:hover{border-color:var(--amber); color:var(--ink)}
+.chip.tr-chip.on{background:var(--amber-soft); border-color:var(--amber); color:var(--amber)}
+.chip .dot{display:inline-block; width:5px; height:5px; border-radius:50%; margin-right:5px; vertical-align:1px}
+
+/* 词 */
+.w{color:var(--ink); border-bottom:1px solid rgba(224,164,92,.5); cursor:pointer; transition:all .12s}
+.w:hover,.w.hot{color:var(--amber); border-bottom-color:var(--amber); background:rgba(224,164,92,.09)}
+
+/* ---------- 侧栏 ---------- */
+.side{position:sticky; top:86px; align-self:start}
+.side h2{
+  font-size:10px; letter-spacing:2.6px; text-transform:uppercase; color:var(--ink-3);
+  margin:0 0 12px; font-weight:700; display:flex; align-items:center; gap:8px;
+}
+.side h2 b{color:var(--amber); font-size:11px; letter-spacing:0}
+.vocals{max-height:calc(100vh - 200px); overflow:auto; padding-right:4px; scrollbar-width:thin}
+.vocals::-webkit-scrollbar{width:5px}
+.vocals::-webkit-scrollbar-thumb{background:var(--line-2); border-radius:3px}
+.vrow{
+  display:flex; align-items:baseline; gap:7px; padding:6px 8px; border-radius:7px; cursor:pointer;
+  transition:background .12s;
+}
+.vrow:hover{background:var(--card-2)}
+.vrow.on{background:var(--amber-soft); box-shadow:inset 2px 0 0 var(--amber)}
+.vrow .v{font-family:var(--serif); font-size:14px; color:var(--ink)}
+.vrow .lv{font-size:9.5px; padding:1px 5px; border-radius:99px; margin-left:auto; flex:none}
+.vrow .z{display:none}
+.side-foot{margin-top:14px; padding-top:12px; border-top:1px solid var(--line);
+  font-size:11px; color:var(--ink-3); line-height:1.7}
+.side-foot b{color:var(--ink-2)}
+
+/* 等级色 */
+.lv{background:var(--card-2); color:var(--ink-3)}
+.lv-c4{background:#1d2a1f; color:#8fbf95}
+.lv-c6{background:#1c2733; color:#8fb3d6}
+.lv-ky{background:#2c2436; color:#b39ddb}
+.lv-z8{background:#332321; color:#e0907f}
+.lv-tf{background:#1f2b2a; color:#7fc3bd}
+.lv-gr{background:#2e2a1b; color:#cbb46a}
+.lv-x{background:#2a2422; color:#b09b8d}
+
+/* ---------- 词卡 ---------- */
+.pop{
+  position:absolute; z-index:70; width:300px; max-width:calc(100vw - 24px);
+  background:#221e19; border:1px solid var(--line-2); border-radius:11px;
+  box-shadow:0 18px 44px -14px rgba(0,0,0,.75); padding:15px 16px 13px; display:none;
+}
+.pop.show{display:block; animation:pop .14s ease}
+@keyframes pop{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.pop .wd{font-family:var(--serif); font-size:19px; font-weight:600; color:var(--ink)}
+.pop .ph{font-size:12px; color:var(--ink-3); margin-left:7px}
+.pop .tags{display:flex; gap:5px; margin-top:7px}
+.pop .tag{font-size:9.5px; padding:1px 6px; border-radius:99px}
+.pop .mn{font-size:13px; line-height:1.7; color:var(--ink-2); margin-top:9px}
+.pop .ft{font-size:10.5px; color:var(--ink-3); margin-top:10px; border-top:1px solid var(--line); padding-top:8px}
+
+@media (max-width:1000px){
+  .shell{grid-template-columns:minmax(0,1fr); padding:22px 18px 110px}
+  /* 手机上右栏会抢走第一屏：每张卡片底部已经有本段词条，这里直接收起 */
+  .side{display:none}
+  .pill-sm{display:none}
+  .card .no{position:static; display:block; margin-bottom:8px}
+  .card{padding:16px 16px 12px}
+  .card .en{font-size:16.5px}
+  .topbar-in{padding:12px 18px}
+}
+</style>
+</head>
+<body>
+<div class="badge">方案 D · 夜间书房</div>
+<div class="pop" id="pop"></div>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <span class="tb-k">Night Desk</span>
+    <span class="tb-t"><b>The Quiet Rebellion of Doing Nothing</b> · 原创示例</span>
+    <span class="pill">已读 3 / 8 段</span>
+    <span class="pill pill-sm">26 词</span>
+  </div>
+  <div class="progress"><i id="pbar"></i></div>
+</div>
+
+<div class="shell">
+  <div class="col-main">
+    <header class="head">
+      <div class="k">Essay · 2026 年 9 月号</div>
+      <h1>The Quiet Rebellion of Doing Nothing</h1>
+      <div class="m"><span><b>540</b> 词</span><span><b>C1</b> 难度</span><span><b>4.8%</b> 生词密度</span><span>约 <b>12</b> 分钟</span></div>
+    </header>
+    <div id="cards"></div>
+  </div>
+
+  <aside class="side">
+    <h2>本篇词汇 <b id="vcount">26</b></h2>
+    <div class="vocals" id="vocals"></div>
+    <div class="side-foot">点词条可定位到原文 · 点正文带下划线的词查看释义</div>
+  </aside>
+</div>
+
+<script>
+const ARTICLE = {
+  paras: [
+    {en:"Not long ago, waiting was an unavoidable part of ordinary life. We waited in lines, waited for buses, waited for friends who were late. These small interludes were treated as dead time — moments to be endured rather than savored. The smartphone has quietly abolished them. Every idle second can now be filled with a scroll, a swipe, a video, and most of us fill it without ever deciding to.",
+     zh:"不久以前，等待还是日常生活里绕不开的一部分。我们排队、等公交、等迟到的朋友。这些短暂的间歇曾被当作「死时间」——是拿来忍受、而非品味的时刻。而智能手机悄无声息地废除了它们。如今每一秒空闲都能被一次滑动、一次刷屏、一段视频填满，而且我们大多数人根本未经决定，就把它们填满了。"},
+    {en:"We are told that this is progress, that an unoccupied mind is a wasted one. But a growing body of research suggests the opposite: the idle brain does some of its most important work precisely when nothing is happening. When we are bored, the mind drifts, and in that drifting it consolidates memories, rehearses possible futures, and stumbles onto ideas that a packed schedule would never permit. Psychologists call this the default mode network; poets simply call it daydreaming.",
+     zh:"有人告诉我们这是进步，说闲着的大脑就是浪费的大脑。但越来越多的研究指向相反的结论：恰恰在无事发生的时候，无所事事的大脑在做一些最重要的工作。当我们感到无聊，思绪开始游荡，而在这游荡之中，大脑巩固记忆、预演种种可能的未来，还会偶然撞上排得满满的日程永远不会允许的念头。心理学家称之为「默认模式网络」；诗人则干脆称之为白日梦。"},
+    {en:"The cost of constant stimulation is easy to describe and hard to measure. Attention, like a muscle, can atrophy. Each fleeting hit of novelty delivers a small dose of gratification, and the threshold for what counts as interesting creeps steadily upward. Tasks that reward patience — reading a novel, learning an instrument, writing anything honest — begin to feel not merely difficult but vaguely humiliating, because they demand exactly the sustained focus we are losing practice at.",
+     zh:"持续刺激的代价，说起来容易，衡量起来很难。注意力像肌肉一样，是会萎缩的。每一次转瞬即逝的新鲜感都送来一小剂满足，而「什么才算有趣」的门槛则不知不觉地稳步上移。那些奖赏耐心的活动——读一部长篇、学一门乐器、写点诚实的东西——开始让人觉得不只是困难，简直隐隐有些丢脸，因为它们要求的，恰恰是我们正日渐生疏的持续专注。"},
+    {en:"None of this is an argument for smashing your phone. The device is not the villain; the habit is. The question is whether we can carve out spaces in the day that remain deliberately unfilled — not optimized, not gamified, simply empty. Boredom, it turns out, is not the absence of meaning but a kind of appetite for it. Monotony is the soil in which imagination, given nothing else to eat, finally begins to grow.",
+     zh:"这一切并不是要你砸掉手机。设备不是罪魁祸首，习惯才是。问题在于：我们能否在一天中开辟出一些刻意留白的空间——不去优化、不做游戏化，只是空着。事实证明，无聊并非意义的缺席，而是对意义的一种胃口。单调是想象力的土壤：当别无可食之时，想象力终于开始生长。"},
+    {en:"The Victorians understood this instinctively. They defended the Sunday walk, the solitary hobby, the long handwritten letter — not as escapes from productive life but as its quiet foundation. Solitude, they suspected, was where a self was slowly assembled; being alone with one’s own thoughts now looks, from the far side of the feed, almost heroic.",
+     zh:"维多利亚时代的人凭直觉明白这一点。他们守护周日的散步、独自的爱好、手写的长信——这些不是对有效率生活的逃避，而是它安静的根基。他们猜想，独处正是一个自我被慢慢塑造的地方；如今在信息流的另一端回望，与自己独处这件事，几乎称得上英勇。"},
+    {en:"To reclaim that territory we do not need a cabin in the woods, only a small ritual: the walk without headphones, the commute with the phone in the bag, the first ten minutes of the morning left unclaimed by any screen. The mind will protest. It has been trained to expect a reward every few seconds, and it will ask, loudly, whether this stillness is not a waste. That question is the starting line.",
+     zh:"要收回那片领地，我们并不需要林间小屋，只需要一个小小的仪式：不戴耳机的散步、把手机放进包里的通勤、清晨头十分钟不交给任何屏幕。念头会抗议。它已被训练成每隔几秒就期待一次奖赏，它会大声追问：这么静着，难道不是浪费吗？而那个问题，正是起跑线。"},
+    {en:"What lies beyond the protest is not bliss but something better: capability. Attention that has been allowed to wander comes back wider. Reading, once the mind has settled, stops being a confrontation and becomes a conversation. The page is patient in a way that almost nothing else in modern life is, and that patience — so conspicuously absent from our feeds — turns out to be exactly what deep learning requires.",
+     zh:"抗议声过后等着的并非极乐，而是更好的东西：能力。被允许游荡过的注意力，回来时会更开阔。一旦心定了下来，阅读不再是一场对抗，而成为一场对话。书页以一种现代生活中几乎绝无仅有的方式耐心，而那种在我们的信息流里显眼缺席的耐心，恰恰是深度学习最需要的东西。"},
+    {en:"So waste a little time this week, on purpose. Sit in the park with nothing. Let the boredom rise and do not answer it. The ideas that arrive uninvited, in the silence we keep fleeing, are usually the ones worth keeping. Doing nothing, it turns out, is how we finally do something.",
+     zh:"所以，这周不妨故意浪费一点时间。坐在公园里，什么都不带。让无聊升起来，别去回应它。那些在我们一直逃离的寂静里不请自来的念头，往往才是值得留下的。无所作为，到头来恰恰是我们真正有所作为的方式。"}
+  ]
+};
+
+const WORDS = [
+  {w:'interlude', f:['interludes'], pos:'n.', ph:'/ˈɪntərluːd/', zh:'（两件事之间的）间歇；插曲', p:0, lv:'考研', c:'lv-ky'},
+  {w:'savor', f:['savored'], pos:'v.', ph:'/ˈseɪvər/', zh:'品味；细细体会', p:0, lv:'托福', c:'lv-tf'},
+  {w:'abolish', f:['abolished'], pos:'v.', ph:'/əˈbɑːlɪʃ/', zh:'废除（制度、习俗）', p:0, lv:'CET-6', c:'lv-c6'},
+  {w:'idle', f:['idle'], pos:'adj.', ph:'/ˈaɪdl/', zh:'空闲的；无所事事的', p:0, lv:'CET-6', c:'lv-c6'},
+  {w:'consolidate', f:['consolidates'], pos:'v.', ph:'/kənˈsɑːlɪdeɪt/', zh:'巩固；合并', p:1, lv:'考研', c:'lv-ky'},
+  {w:'rehearse', f:['rehearses'], pos:'v.', ph:'/rɪˈhɜːrs/', zh:'排练；（心里）预演', p:1, lv:'专八', c:'lv-z8'},
+  {w:'stumble on', f:['stumbles onto'], pos:'phr.', ph:'', zh:'偶然发现；无意中碰上', p:1, lv:'考研', c:'lv-ky'},
+  {w:'atrophy', f:['atrophy'], pos:'v.', ph:'/ˈætrəfi/', zh:'萎缩，衰退', p:2, lv:'GRE', c:'lv-gr'},
+  {w:'fleeting', f:['fleeting'], pos:'adj.', ph:'/ˈfliːtɪŋ/', zh:'转瞬即逝的', p:2, lv:'雅思', c:'lv-tf'},
+  {w:'novelty', f:['novelty'], pos:'n.', ph:'/ˈnɑːvlti/', zh:'新奇（感）', p:2, lv:'CET-6', c:'lv-c6'},
+  {w:'gratification', f:['gratification'], pos:'n.', ph:'/ˌɡrætɪfɪˈkeɪʃn/', zh:'满足感', p:2, lv:'考研', c:'lv-ky'},
+  {w:'threshold', f:['threshold'], pos:'n.', ph:'/ˈθreʃhoʊld/', zh:'门槛；阈限', p:2, lv:'CET-6', c:'lv-c6'},
+  {w:'humiliating', f:['humiliating'], pos:'adj.', ph:'/hjuːˈmɪlieɪtɪŋ/', zh:'使人蒙羞的', p:2, lv:'专八', c:'lv-z8'},
+  {w:'sustained', f:['sustained'], pos:'adj.', ph:'/səˈsteɪnd/', zh:'持续的，持久的', p:2, lv:'CET-6', c:'lv-c6'},
+  {w:'villain', f:['villain'], pos:'n.', ph:'/ˈvɪlən/', zh:'反派；罪魁祸首', p:3, lv:'考研', c:'lv-ky'},
+  {w:'carve out', f:['carve out'], pos:'phr.', ph:'', zh:'开辟出；争取到', p:3, lv:'考研', c:'lv-ky'},
+  {w:'deliberate', f:['deliberately'], pos:'adj.', ph:'/dɪˈlɪbərət/', zh:'故意的；深思熟虑的', p:3, lv:'CET-6', c:'lv-c6'},
+  {w:'monotony', f:['monotony'], pos:'n.', ph:'/məˈnɑːtəni/', zh:'单调，千篇一律', p:3, lv:'CET-6', c:'lv-c6'},
+  {w:'gamify', f:['gamified'], pos:'v.', ph:'/ˈɡeɪmɪfaɪ/', zh:'使游戏化（超纲新造词）', p:3, lv:'超纲', c:'lv-x'},
+  {w:'instinctively', f:['instinctively'], pos:'adv.', ph:'/ɪnˈstɪŋktɪvli/', zh:'本能地；凭直觉地', p:4, lv:'CET-6', c:'lv-c6'},
+  {w:'solitary', f:['solitary'], pos:'adj.', ph:'/ˈsɑːləteri/', zh:'独自的；喜独处的', p:4, lv:'CET-6', c:'lv-c6'},
+  {w:'solitude', f:['solitude'], pos:'n.', ph:'/ˈsɑːlətuːd/', zh:'独处；孤独', p:4, lv:'专八', c:'lv-z8'},
+  {w:'reclaim', f:['reclaim'], pos:'v.', ph:'/rɪˈkleɪm/', zh:'收回；重新获得', p:5, lv:'托福', c:'lv-tf'},
+  {w:'bliss', f:['bliss'], pos:'n.', ph:'/blɪs/', zh:'极乐，至福', p:6, lv:'专八', c:'lv-z8'},
+  {w:'confrontation', f:['confrontation'], pos:'n.', ph:'/ˌkɑːnfrənˈteɪʃn/', zh:'对抗，对峙', p:6, lv:'考研', c:'lv-ky'},
+  {w:'conspicuous', f:['conspicuously'], pos:'adj.', ph:'/kənˈspɪkjuəs/', zh:'显眼的，惹人注目的', p:6, lv:'托福', c:'lv-tf'}
+];
+
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rx = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+function renderEN(text, pi){
+  const list = WORDS.filter(x => x.p === pi);
+  const holds = [];
+  let t = esc(text);
+  const mark = (needle, key) => {
+    if (!needle) return;
+    const re = new RegExp('\\b' + rx(esc(needle)) + '\\b', 'gi');
+    t = t.replace(re, m => {
+      holds.push('<b class="w" data-k="' + esc(key) + '">' + m + '</b>');
+      return '\u0002' + (holds.length - 1) + '\u0003';
+    });
+  };
+  list.filter(x => x.w.includes(' ')).forEach(x => { mark(x.w, x.w); (x.f || []).forEach(f => mark(f, x.w)); });
+  list.filter(x => !x.w.includes(' ')).forEach(x => { mark(x.w, x.w); (x.f || []).forEach(f => mark(f, x.w)); });
+  return t.replace(/\u0002(\d+)\u0003/g, (_, i) => holds[+i]);
+}
+
+/* 段落卡 */
+document.getElementById('cards').innerHTML = ARTICLE.paras.map((p, i) => {
+  const ws = WORDS.filter(x => x.p === i);
+  return `
+  <article class="card" data-p="${i}" id="p${i}">
+    <span class="no">${String(i + 1).padStart(2, '0')}</span>
+    <div class="en"><p>${renderEN(p.en, i)}</p></div>
+    <div class="tr">${esc(p.zh)}</div>
+    <div class="foot">
+      <button class="chip tr-chip" data-tr="${i}">译</button>
+      ${ws.map(w => `<button class="chip" data-k="${esc(w.w)}"><span class="dot" style="background:${w.c === 'lv-c6' ? '#8fb3d6' : w.c === 'lv-ky' ? '#b39ddb' : w.c === 'lv-z8' ? '#e0907f' : w.c === 'lv-tf' ? '#7fc3bd' : w.c === 'lv-gr' ? '#cbb46a' : '#b09b8d'}"></span>${esc(w.w)}</button>`).join('')}
+    </div>
+  </article>`;
+}).join('');
+
+/* 侧栏词汇 */
+document.getElementById('vocals').innerHTML = WORDS.map(w =>
+  `<div class="vrow" data-k="${esc(w.w)}"><span class="v">${esc(w.w)}</span><span class="lv ${w.c}">${esc(w.lv)}</span></div>`
+).join('');
+
+/* 译文 */
+document.querySelectorAll('[data-tr]').forEach(b => b.onclick = () => {
+  const c = document.getElementById('p' + b.dataset.tr);
+  const on = c.classList.toggle('open');
+  b.classList.toggle('on', on);
+  b.textContent = on ? '收起' : '译';
+});
+
+/* 词卡 */
+const pop = document.getElementById('pop');
+function showPop(el, key){
+  const w = WORDS.find(x => x.w === key);
+  if (!w) return;
+  pop.innerHTML = `<div><span class="wd">${esc(w.w)}</span>${w.ph ? `<span class="ph">${esc(w.ph)}</span>` : ''}</div>
+    <div class="tags"><span class="tag ${w.c}">${esc(w.lv)}</span><span class="tag" style="background:#2a251e;color:#b3a894">${esc(w.pos)}</span></div>
+    <div class="mn">${esc(w.zh)}</div>
+    <div class="ft">已收入生词本 · 到期复习：3 天后</div>`;
+  pop.classList.add('show');
+  const r = el.getBoundingClientRect();
+  const pw = pop.offsetWidth, ph = pop.offsetHeight;
+  let left = Math.max(12, Math.min(innerWidth - pw - 12, r.left + scrollX + r.width / 2 - pw / 2));
+  let top = r.bottom + scrollY + 10;
+  if (r.bottom + ph + 24 > innerHeight) top = Math.max(8, r.top + scrollY - ph - 10);
+  pop.style.left = left + 'px';
+  pop.style.top = top + 'px';
+  document.querySelectorAll('.w.hot').forEach(n => n.classList.remove('hot'));
+  document.querySelectorAll('.vrow').forEach(v => v.classList.toggle('on', v.dataset.k === key));
+  document.querySelectorAll(`.w[data-k="${CSS.escape(key)}"]`).forEach(n => n.classList.add('hot'));
+}
+
+document.addEventListener('click', e => {
+  const inText = e.target.closest('.w');
+  if (inText) { e.stopPropagation(); showPop(inText, inText.dataset.k); return; }
+  const inSide = e.target.closest('.vrow');
+  if (inSide) {
+    const k = inSide.dataset.k;
+    const t = document.querySelector(`.w[data-k="${CSS.escape(k)}"]`);
+    if (t) {
+      t.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      const card = t.closest('.card');
+      card.classList.add('flash'); setTimeout(() => card.classList.remove('flash'), 1200);
+      setTimeout(() => showPop(t, k), 260);
+    }
+    return;
+  }
+  const chip = e.target.closest('.chip[data-k]');
+  if (chip) { showPop(chip, chip.dataset.k); return; }
+  pop.classList.remove('show');
+  document.querySelectorAll('.w.hot,.vrow.on').forEach(n => n.classList.remove('hot', 'on'));
+});
+
+/* 进度条：按滚动位置 */
+const pbar = document.getElementById('pbar');
+addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - innerHeight;
+  pbar.style.width = (h > 0 ? Math.min(100, Math.max(0, scrollY / h * 100)) : 0) + '%';
+}, { passive: true });
+</script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+# Generated web and Android artifacts
+/index.html
+/dist/
+/android/assets/
+/android/build/
+/test/shots/
+/node_modules/
+
+# Local articles, exports, and development notes
+/src/atlantic.js
+/data/
+*.epub
+/RESEARCH.md
+/REVIEW-*.md
+/FUNCTIONAL-REVIEW-*.md
+
+# Credentials and machine-specific configuration
+*.keystore
+*.jks
+*.p12
+*.pfx
+*.pem
+*.key
+.env
+.env.*
+/local.properties
+/android/local.properties
+.DS_Store
+Thumbs.db

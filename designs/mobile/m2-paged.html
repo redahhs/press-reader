@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>方案 2 · 逐段翻页</title>
+<style>
+/* ============================================================
+   方案 2 —「逐段翻页」
+   一段一屏，上滑翻段（scroll-snap），顶部是 8 段细格子进度。
+   手指不用精确滑动：往上一推就恰好停在下一段，回看也一样。
+   查词不弹抽屉，从底部升一条只占一行高的词条，不挡正文。
+   ============================================================ */
+:root{
+  --paper:#f4f1e9; --ink:#1f1c16; --ink-2:#53503f; --ink-3:#867f6e;
+  --line:#e2dccb; --card:#fffdf8; --accent:#9c3a1c;
+  --serif:"Iowan Old Style",Charter,"Sitka Text",Georgia,"Songti SC",serif;
+  --sans:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei UI",sans-serif;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{margin:0; height:100%}
+body{background:#111013; display:grid; place-items:center; padding:28px 16px; font-family:var(--sans); color:#fff}
+.stage{display:flex; flex-direction:column; align-items:center; gap:14px}
+.cap{font-size:12px; letter-spacing:1.6px; color:#8b8794; text-transform:uppercase}
+.cap b{color:#fff; font-weight:600; letter-spacing:0; text-transform:none; font-size:13px}
+
+.phone{width:390px; height:844px; border-radius:46px; padding:9px;
+  background:linear-gradient(160deg,#3a3a42,#141418 60%);
+  box-shadow:0 30px 80px -20px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.06) inset; position:relative}
+.screen{position:relative; width:100%; height:100%; border-radius:38px; overflow:hidden;
+  background:var(--paper); color:var(--ink); display:flex; flex-direction:column}
+.island{position:absolute; top:9px; left:50%; transform:translateX(-50%); width:104px; height:26px; border-radius:14px; background:#0b0b0d; z-index:30}
+.statusbar{height:46px; flex:none; display:flex; align-items:flex-end; justify-content:space-between;
+  padding:0 22px 4px; font-size:12.5px; font-weight:600; z-index:20}
+.statusbar .icons{display:flex; gap:5px; align-items:center; opacity:.85}
+.statusbar svg{width:15px; height:15px}
+
+/* 顶部段进度：8 格，像故事条但不抢戏 */
+.topseg{flex:none; display:flex; gap:4px; padding:2px 22px 0}
+.topseg i{flex:1; height:3px; border-radius:2px; background:var(--line); transition:background .25s}
+.topseg i.done{background:color-mix(in srgb, var(--accent) 55%, transparent)}
+.topseg i.cur{background:var(--accent)}
+
+/* 分页容器 */
+.pages{flex:1; overflow-y:auto; scroll-snap-type:y mandatory; scrollbar-width:none; -webkit-overflow-scrolling:touch}
+.pages::-webkit-scrollbar{display:none}
+.page{
+  min-height:100%; scroll-snap-align:start; scroll-snap-stop:always;
+  display:flex; flex-direction:column; justify-content:center;
+  padding:10px 26px 112px;
+}
+.pno{font-family:var(--sans); font-size:11px; letter-spacing:2.4px; color:var(--accent); font-weight:700; margin-bottom:14px}
+.pno b{font-family:var(--serif); font-size:15px; letter-spacing:0; color:var(--ink); margin-right:2px}
+.en{font-family:var(--serif); font-size:19px; line-height:1.86; color:var(--ink)}
+.w{border-bottom:1px solid rgba(156,58,28,.38); cursor:pointer}
+.w:active{background:#efe1d6}
+.zh{display:none; margin-top:18px; padding-top:16px; border-top:1px solid var(--line);
+  font-size:14px; line-height:1.95; color:var(--ink-2)}
+body.show-zh .zh{display:block}
+.hintline{margin-top:22px; font-size:11.5px; color:var(--ink-3); display:flex; align-items:center; gap:6px}
+.hintline svg{width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:1.8}
+
+/* 底部条 */
+.dock{
+  position:absolute; left:0; right:0; bottom:0; z-index:25; padding:8px 18px calc(16px + env(safe-area-inset-bottom,0px));
+  display:flex; align-items:center; gap:12px;
+  background:linear-gradient(rgba(244,241,233,0), rgba(244,241,233,.94) 34%);
+}
+.dock button{
+  height:52px; border-radius:16px; border:1px solid var(--line-2, #d8d0ba); background:var(--card);
+  display:grid; place-items:center; color:var(--ink-2); cursor:pointer; font-family:var(--sans); font-size:14px;
+}
+.dock button:active{transform:scale(.97)}
+.dock .arrow{width:56px; flex:none}
+.dock .arrow svg{width:21px; height:21px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round}
+.dock .mid{flex:1; display:flex; align-items:center; justify-content:flex-end; gap:10px}
+.dock .count{font-size:12.5px; color:var(--ink-3); font-variant-numeric:tabular-nums; letter-spacing:.5px; margin-right:auto; padding-left:6px}
+.dock .zhbtn{min-width:76px; font-size:14px}
+.dock .zhbtn.on{background:var(--ink); color:var(--paper); border-color:var(--ink)}
+
+/* 一行词条：从底部升起，不挡正文 */
+.wordbar{
+  position:absolute; left:12px; right:12px; bottom:calc(78px + env(safe-area-inset-bottom,0px)); z-index:35;
+  display:flex; align-items:center; gap:10px; padding:12px 14px;
+  background:var(--ink); color:var(--paper); border-radius:14px;
+  box-shadow:0 12px 30px -10px rgba(30,24,16,.55);
+  transform:translateY(calc(100% + 96px)); transition:transform .24s cubic-bezier(.2,.8,.2,1);
+}
+.wordbar.on{transform:none}
+.wordbar .wb-w{font-family:var(--serif); font-size:17px; font-weight:600; flex:none}
+.wordbar .wb-ph{font-size:11px; opacity:.6; margin-left:-4px; flex:none}
+.wordbar .wb-m{flex:1; font-size:13px; line-height:1.5; opacity:.92; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.wordbar .wb-add{flex:none; height:34px; padding:0 12px; border-radius:9px; border:0; background:var(--paper); color:var(--ink); font-size:12.5px; cursor:pointer}
+
+@media (max-width:700px){
+  body{padding:0; display:block; background:var(--paper)}
+  .stage{gap:0}
+  .cap{display:none}
+  .phone{width:100%; height:100dvh; border-radius:0; padding:0; background:var(--paper); box-shadow:none}
+  .screen{border-radius:0; height:100dvh}
+  .island{display:none}
+  .statusbar{height:env(safe-area-inset-top,24px); min-height:24px}
+}
+</style>
+</head>
+<body>
+<div class="stage">
+  <figure class="phone" style="margin:0">
+    <div class="screen">
+      <div class="island"></div>
+      <div class="statusbar">
+        <span>9:41</span>
+        <span class="icons">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 9.5a12 12 0 0 1 16 0M7 13a8 8 0 0 1 10 0M10 16.5a4 4 0 0 1 4 0"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="7" width="17" height="10" rx="2.5"/><rect x="4" y="9" width="11" height="6" rx="1" fill="currentColor" stroke="none"/></svg>
+        </span>
+      </div>
+      <div class="topseg" id="seg"></div>
+      <div class="pages" id="pages"></div>
+      <div class="wordbar" id="wordbar"></div>
+      <div class="dock">
+        <button class="arrow" id="prev"><svg viewBox="0 0 24 24"><path d="M14.5 5.5 8 12l6.5 6.5"/></svg></button>
+        <div class="mid">
+          <span class="count" id="count">1 / 4</span>
+          <button class="zhbtn" id="zh">译文</button>
+        </div>
+        <button class="arrow" id="next"><svg viewBox="0 0 24 24"><path d="M9.5 5.5 16 12l-6.5 6.5"/></svg></button>
+      </div>
+    </div>
+  </figure>
+  <figcaption class="cap"><b>方案 2 · 逐段翻页</b> · 上滑/点箭头翻段 · 点词条看释义</figcaption>
+</div>
+
+<script>
+const PARAS = [
+  {en:"Not long ago, waiting was an unavoidable part of ordinary life. We waited in lines, waited for buses, waited for friends who were late. These small interludes were treated as dead time — moments to be endured rather than savored. The smartphone has quietly abolished them.",
+   zh:"不久以前，等待还是日常生活里绕不开的一部分。我们排队、等公交、等迟到的朋友。这些短暂的间歇曾被当作「死时间」——是拿来忍受、而非品味的时刻。而智能手机悄无声息地废除了它们。"},
+  {en:"We are told that this is progress, that an unoccupied mind is a wasted one. But a growing body of research suggests the opposite: the idle brain does some of its most important work precisely when nothing is happening.",
+   zh:"有人告诉我们这是进步，说闲着的大脑就是浪费的大脑。但越来越多的研究指向相反的结论：恰恰在无事发生的时候，无所事事的大脑在做一些最重要的工作。"},
+  {en:"The cost of constant stimulation is easy to describe and hard to measure. Attention, like a muscle, can atrophy. Each fleeting hit of novelty delivers a small dose of gratification, and the threshold for what counts as interesting creeps steadily upward.",
+   zh:"持续刺激的代价，说起来容易，衡量起来很难。注意力像肌肉一样，是会萎缩的。每一次转瞬即逝的新鲜感都送来一小剂满足，而「什么才算有趣」的门槛则不知不觉地稳步上移。"},
+  {en:"None of this is an argument for smashing your phone. The device is not the villain; the habit is. The question is whether we can carve out spaces in the day that remain deliberately unfilled.",
+   zh:"这一切并不是要你砸掉手机。设备不是罪魁祸首，习惯才是。问题在于：我们能否在一天中开辟出一些刻意留白的空间。"}
+];
+const WORDS = {
+  interlude:{ph:'/ˈɪntərluːd/', zh:'（两件事之间的）间歇；插曲'},
+  abolish:{ph:'/əˈbɑːlɪʃ/', zh:'废除（制度、习俗）；取消'},
+  idle:{ph:'/ˈaɪdl/', zh:'空闲的；无所事事的'},
+  atrophy:{ph:'/ˈætrəfi/', zh:'（能力、肌肉）萎缩，衰退'},
+  fleeting:{ph:'/ˈfliːtɪŋ/', zh:'转瞬即逝的'},
+  threshold:{ph:'/ˈθreʃhoʊld/', zh:'门槛；阈限'},
+  villain:{ph:'/ˈvɪlən/', zh:'反派；罪魁祸首'}
+};
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const hl = t => {
+  let s = esc(t);
+  Object.keys(WORDS).forEach(k => { s = s.replace(new RegExp('\\b'+k+'(?:s|es|ed|d|ing)?\\b','gi'), m => `<span class="w" data-k="${k}">${m}</span>`); });
+  return s;
+};
+
+document.getElementById('seg').innerHTML = PARAS.map(() => '<i></i>').join('');
+const pages = document.getElementById('pages');
+pages.innerHTML = PARAS.map((p, i) => `
+  <section class="page" data-i="${i}">
+    <div class="pno"><b>${String(i+1).padStart(2,'0')}</b> / ${String(PARAS.length).padStart(2,'0')}</div>
+    <div class="en">${hl(p.en)}</div>
+    <div class="zh">${esc(p.zh)}</div>
+    <div class="hintline"><svg viewBox="0 0 24 24"><path d="M12 19V6M6.5 11.5 12 6l5.5 5.5"/></svg>${i < PARAS.length - 1 ? '上滑继续' : '已到本篇末尾'}</div>
+  </section>`).join('');
+
+let cur = 0;
+const count = document.getElementById('count');
+const segs = [...document.querySelectorAll('#seg i')];
+
+function setCur(i){
+  cur = Math.max(0, Math.min(PARAS.length - 1, i));
+  count.textContent = (cur + 1) + ' / ' + PARAS.length;
+  segs.forEach((s, k) => { s.classList.toggle('done', k < cur); s.classList.toggle('cur', k === cur); });
+}
+const go = i => {
+  const el = pages.querySelector(`.page[data-i="${Math.max(0, Math.min(PARAS.length-1, i))}"]`);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+/* 滚动时算当前页 */
+pages.addEventListener('scroll', () => {
+  const h = pages.clientHeight;
+  const i = Math.round(pages.scrollTop / h);
+  if (i !== cur) setCur(i);
+}, { passive: true });
+
+document.getElementById('prev').onclick = () => go(cur - 1);
+document.getElementById('next').onclick = () => go(cur + 1);
+document.getElementById('zh').onclick = e => {
+  document.body.classList.toggle('show-zh');
+  e.currentTarget.classList.toggle('on', document.body.classList.contains('show-zh'));
+};
+
+/* 一行词条 */
+const wb = document.getElementById('wordbar');
+pages.addEventListener('click', e => {
+  const w = e.target.closest('.w');
+  if (!w) { wb.classList.remove('on'); return; }
+  const d = WORDS[w.dataset.k];
+  wb.innerHTML = `<span class="wb-w">${esc(w.textContent)}</span>
+    <span class="wb-ph">${esc(d.ph)}</span>
+    <span class="wb-m">${esc(d.zh)}</span>
+    <button class="wb-add">收录</button>`;
+  wb.classList.add('on');
+  wb.querySelector('.wb-add').onclick = () => {
+    wb.classList.remove('on');
+    const t = document.createElement('div');
+    t.textContent = '已加入生词本';
+    t.style.cssText = 'position:absolute;left:50%;bottom:140px;transform:translateX(-50%);background:rgba(31,28,22,.9);color:#fff;padding:9px 15px;border-radius:99px;font-size:12.5px;z-index:40';
+    document.querySelector('.screen').appendChild(t);
+    setTimeout(() => t.remove(), 1600);
+  };
+});
+
+setCur(0);
+</script>
+</body>
+</html>

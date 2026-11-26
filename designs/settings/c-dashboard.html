@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="paper">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>设置 · 方案 C 控制台</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --paper:#f6f2ea;--paper-2:#eee8db;--card:#fffdf7;--card-2:#fbf7ee;
+  --ink:#2c2822;--ink-2:#5d564a;--ink-3:#6f6558;
+  --line:#e2dac9;--line-2:#d2c7ae;
+  --accent:#b5401f;--accent-deep:#933317;--accent-soft:#f4e0d5;--accent-ink:#8a3514;--on-accent:#fdf8f2;
+  --ok:#4c7a4c;--ok-bg:#e6efe2;--danger:#b3261e;--warn:#a06a1f;
+  --serif:"Sitka Text",Charter,"Iowan Old Style",Georgia,"Noto Serif","Times New Roman",STSong,serif;
+  --sans:"Segoe UI Variable Text","Segoe UI",-apple-system,BlinkMacSystemFont,system-ui,"PingFang SC","Microsoft YaHei UI","Microsoft YaHei",sans-serif;
+}
+[data-theme="night"]{
+  --paper:#191713;--paper-2:#211e18;--card:#242019;--card-2:#221e18;
+  --ink:#ece5d6;--ink-2:#b6ac9a;--ink-3:#938877;
+  --line:#353026;--line-2:#463f31;
+  --accent:#e2714d;--accent-deep:#e8845f;--accent-soft:#3d281d;--accent-ink:#ee9a78;--on-accent:#151310;
+  --ok:#8fb98c;--ok-bg:#2a332a;--danger:#f08a7f;--warn:#cfa054;
+}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:14px;line-height:1.6}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+a{color:inherit;text-decoration:none}
+
+.top{display:flex;align-items:center;gap:12px;height:46px;padding:0 18px;border-bottom:1px solid var(--line);background:var(--paper-2);font-size:12.5px;color:var(--ink-3)}
+.top .back{padding:4px 9px;border-radius:6px;color:var(--accent-ink);font-weight:600}
+.top .back:hover{background:var(--card)}
+.top .grow{flex:1}
+.top .tag{border:1px solid var(--line-2);border-radius:99px;padding:2px 8px;font-size:11px}
+.tbtn{padding:5px 11px;border:1px solid var(--line-2);border-radius:99px;background:var(--card);font-size:12px;color:var(--ink-2)}
+
+.wrap{max-width:1060px;margin:0 auto;padding:24px 26px 64px}
+.hd{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.hd h1{font-size:24px;letter-spacing:.3px;font-weight:700}
+.hd .sub{font-size:12px;color:var(--ink-3);margin-top:2px}
+.saved{font-size:11.5px;color:var(--ok);display:inline-flex;align-items:center;gap:6px}
+.saved i{width:6px;height:6px;border-radius:50%;background:var(--ok)}
+
+/* 状态条 */
+.strip{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.pill{display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border:1px solid var(--line-2);border-radius:99px;background:var(--card);font-size:11.5px;color:var(--ink-3)}
+.pill b{color:var(--ink);font-weight:600}
+.pill .led{width:6px;height:6px;border-radius:50%;background:var(--ok)}
+.pill .led.warn{background:var(--warn)}
+
+/* 卡片骨架 */
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:0 1px 2px rgba(40,30,20,.03),0 18px 40px -34px rgba(40,30,20,.4)}
+.card h2{font-size:11px;letter-spacing:1.8px;text-transform:uppercase;color:var(--ink-3);font-weight:700;display:flex;align-items:center;gap:8px}
+.card h2 .r{margin-left:auto;font-size:10.5px;letter-spacing:0;text-transform:none;color:var(--ink-3);font-weight:400}
+
+/* 主卡：阅读与排版 */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:26px;padding:22px 24px;background:linear-gradient(180deg,var(--card),var(--card-2));margin-bottom:16px}
+.hero h2{margin-bottom:4px}
+.hero h3{font-size:17px;font-weight:700;letter-spacing:.2px;margin:4px 0 2px}
+.hero .desc{font-size:12px;color:var(--ink-3);margin-bottom:16px}
+.ctrls{display:grid;gap:13px}
+.cline{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.cline>span{font-size:12.5px;color:var(--ink-2)}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:99px;overflow:hidden;background:var(--paper)}
+.seg button{padding:4px 11px;font-size:12px;color:var(--ink-3)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--ink);color:var(--paper)}
+.sw{width:36px;height:21px;border-radius:99px;background:var(--line-2);position:relative;flex:none}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;background:var(--card)}
+.sw.on{background:var(--accent)} .sw.on::after{left:17px}
+
+/* 预览 */
+.pv{border:1px solid var(--line);border-radius:12px;background:var(--paper);padding:18px 18px 14px;display:flex;flex-direction:column}
+.pv .cap{font-size:9.5px;letter-spacing:1.8px;text-transform:uppercase;color:var(--ink-3);font-weight:700;margin-bottom:10px}
+.pv .en{font-family:var(--read,var(--serif));font-size:calc(16px + var(--fs,1) * 2px);line-height:1.75;color:var(--ink)}
+.pv .en em{font-style:normal;border-bottom:1px solid color-mix(in srgb,var(--accent) 55%,transparent);color:var(--accent-ink)}
+.pv .tr{margin-top:12px;font-size:12.5px;line-height:1.85;color:var(--ink-2);border-left:2px solid var(--line-2);padding-left:11px}
+.pv .tr.hide{display:none}
+.pv .foot{margin-top:auto;padding-top:12px;border-top:1px dashed var(--line);display:flex;gap:10px;font-size:10.5px;color:var(--ink-3);flex-wrap:wrap}
+.pv .foot b{color:var(--ink-2);font-weight:600}
+
+/* 网格 */
+.grid{display:grid;grid-template-columns:1.12fr .88fr;gap:16px;align-items:start}
+.col{display:grid;gap:16px}
+.f{display:flex;flex-direction:column;gap:5px;margin-top:12px}
+.f label{font-size:11.5px;font-weight:600;color:var(--ink-2)}
+.input{padding:7px 10px;border:1px solid var(--line-2);border-radius:8px;background:var(--card);font-size:13px;color:var(--ink);width:100%}
+.input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 13%,transparent)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.withbtn{display:flex;gap:7px}
+.withbtn .input{flex:1}
+.btn{padding:6px 13px;border:1px solid var(--line-2);border-radius:8px;background:var(--card);font-size:12.5px;color:var(--ink-2);white-space:nowrap}
+.btn:hover{border-color:var(--ink-3);color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600}
+.btn.danger{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 32%,var(--line-2))}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center}
+.status{font-size:11px;color:var(--ok);display:inline-flex;align-items:center;gap:5px;margin-top:10px}
+.status i{width:6px;height:6px;border-radius:50%;background:var(--ok)}
+.hint{font-size:11px;color:var(--ink-3);margin-top:5px;line-height:1.5}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.chip{padding:4px 10px;border:1px solid var(--line-2);border-radius:99px;font-size:11.5px;color:var(--ink-2);background:var(--card)}
+.chip.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
+
+/* 主题 / 主色 */
+.themes{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:12px}
+.tc{border:1px solid var(--line-2);border-radius:9px;padding:5px;background:var(--card);text-align:center}
+.tc.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.tc i{display:grid;place-items:center;height:32px;border-radius:6px;font-family:var(--serif);font-size:13px;font-weight:700;border:1px solid var(--line);font-style:normal}
+.tc span{display:block;font-size:10.5px;color:var(--ink-3);margin-top:4px}
+.accs{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.acclab{font-size:11px;color:var(--ink-3);margin-right:2px}
+.acc{width:22px;height:22px;border-radius:50%;border:2px solid transparent;padding:0}
+.acc span{display:block;width:100%;height:100%;border-radius:50%}
+.acc.on{border-color:var(--ink-3)}
+.auto{margin-left:auto;font-size:11px;color:var(--ink-3);border:1px dashed var(--line-2);border-radius:99px;padding:3px 9px}
+
+/* 数据 */
+.usage{display:flex;align-items:center;gap:10px;margin-top:14px}
+.bar{flex:1;height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:24%;background:var(--accent);border-radius:99px}
+.usage b{font-size:11.5px;color:var(--ink-2);font-weight:600;white-space:nowrap}
+.stat2{display:flex;gap:18px;margin-top:12px}
+.stat2 div b{display:block;font-family:var(--serif);font-size:20px;line-height:1.2}
+.stat2 div span{font-size:10.5px;color:var(--ink-3)}
+
+/* 底部 */
+.foot{margin-top:22px;padding-top:14px;border-top:1px solid var(--line);display:flex;gap:18px;flex-wrap:wrap;font-size:11.5px;color:var(--ink-3)}
+.foot a{color:var(--accent-ink)}
+.foot .grow{flex:1}
+
+@media (max-width:980px){
+  .hero{grid-template-columns:1fr}
+  .grid{grid-template-columns:1fr}
+  .wrap{padding:18px 16px 56px}
+  .themes{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="back" href="index.html">← 方案对比</a>
+  <span>设置</span><span class="tag">方案 C · 控制台</span>
+  <span class="grow"></span>
+  <button class="tbtn" id="themeBtn">夜读</button>
+</header>
+
+<div class="wrap">
+  <div class="hd">
+    <div>
+      <h1>设置</h1>
+      <div class="sub">看得见的选项直接在这里试，不用来回跳页面。</div>
+    </div>
+    <span class="saved"><i></i>全部已保存 · v1.6.1</span>
+  </div>
+
+  <div class="strip">
+    <a class="pill" href="#ai"><span class="led"></span>AI <b>智谱 glm-4.6</b></a>
+    <a class="pill" href="#look"><span class="led"></span>主题 <b id="pillTheme">纸白</b> · 朱砂</a>
+    <a class="pill" href="#data"><span class="led"></span>数据 <b>1.2 MB / 38 篇</b></a>
+    <a class="pill" href="#net"><span class="led"></span>代理 <b>127.0.0.1:7890</b></a>
+    <a class="pill" href="#net"><span class="led"></span>音色 <b>Samantha</b></a>
+  </div>
+
+  <!-- 主卡 -->
+  <section class="card hero">
+    <div>
+      <h2>阅读与排版 <span class="r">改动即时生效</span></h2>
+      <h3>这一段就是你的阅读界面</h3>
+      <p class="desc">版式、字号、字体、译文方式都在右边实时反映——不用保存后再去文章里试。</p>
+      <div class="ctrls">
+        <div class="cline"><span>版式</span>
+          <div class="seg" id="segLayout"><button class="on" data-v="classic">经典</button><button data-v="annotated">注释本</button><button data-v="desk">卡片</button></div>
+        </div>
+        <div class="cline"><span>字号</span>
+          <div class="seg" id="segFs"><button>小</button><button class="on">中</button><button>大</button><button>特大</button></div>
+        </div>
+        <div class="cline"><span>字体</span>
+          <div class="seg" id="segFf"><button class="on">衬线</button><button>无衬线</button></div>
+        </div>
+        <div class="cline"><span>译文</span>
+          <div class="seg" id="segTr"><button class="on">点译</button><button>全译</button><button>提示</button></div>
+        </div>
+        <div class="cline"><span>生词标注基准</span>
+          <div class="seg"><button>CET-4</button><button class="on">CET-6</button><button>专八</button></div>
+        </div>
+        <div class="cline"><span>分页阅读</span><button class="sw on" data-sw></button></div>
+      </div>
+    </div>
+    <aside class="pv" id="pv" data-layout="classic">
+      <div class="cap">Live Preview</div>
+      <p class="en">Most of us treat rest as the <em>absence</em> of work — something to be earned after the real business of the day is done.</p>
+      <p class="tr" id="pvTr">我们大多数人把休息当作工作的对立面——它是忙完正事之后才配得到的东西。</p>
+      <div class="foot"><span>字号 <b id="fFs">中号 16px</b></span><span>版式 <b id="fLy">经典</b></span><span>译文 <b id="fTr">点译</b></span></div>
+    </aside>
+  </section>
+
+  <div class="grid">
+    <div class="col">
+      <!-- AI -->
+      <section class="card" id="ai">
+        <h2>AI 服务 <span class="r">OpenAI 兼容</span></h2>
+        <div class="chips">
+          <button class="chip on">智谱 AI</button><button class="chip">OpenAI</button><button class="chip">DeepSeek</button><button class="chip">Kimi</button><button class="chip">硅基流动</button>
+        </div>
+        <div class="row2">
+          <div class="f"><label>Base URL</label><input class="input" value="https://open.bigmodel.cn/api/paas/v4"></div>
+          <div class="f"><label>模型</label><input class="input" value="glm-4.6"></div>
+        </div>
+        <div class="f"><label>API Key</label>
+          <div class="withbtn"><input class="input" id="key" type="password" value="example-api-key"><button class="btn" id="eye">显示</button></div>
+        </div>
+        <div class="acts"><button class="btn">测试连接</button><button class="btn primary">保存</button><span class="status"><i></i>1,240ms · 正常</span></div>
+      </section>
+
+      <!-- 网络与朗读 -->
+      <section class="card" id="net">
+        <h2>网络与朗读</h2>
+        <div class="row2">
+          <div class="f"><label>抓取代理</label><input class="input" value="http://127.0.0.1:7890"></div>
+          <div class="f"><label>朗读音色</label><select class="input"><option>Samantha（本地）</option><option>Microsoft Aria（在线）</option></select></div>
+        </div>
+        <div class="acts"><button class="btn">检测代理</button><button class="btn">试听音色</button>
+          <div class="seg" style="margin-left:auto"><button>0.6×</button><button>0.8×</button><button class="on">1.0×</button><button>1.2×</button></div>
+        </div>
+        <p class="hint">代理只接受本机地址；被 Cloudflare 拦时用「取正文」书签，不是网络问题。</p>
+      </section>
+    </div>
+
+    <div class="col">
+      <!-- 外观 -->
+      <section class="card" id="look">
+        <h2>外观</h2>
+        <div class="themes">
+          <button class="tc on" data-th="paper"><i style="background:#f6f2ea;color:#2c2822">Aa</i><span>纸白</span></button>
+          <button class="tc" data-th="sepia"><i style="background:#f2e8d5;color:#3a3226">Aa</i><span>米黄</span></button>
+          <button class="tc" data-th="sage"><i style="background:#e9efe5;color:#222b21">Aa</i><span>护眼绿</span></button>
+          <button class="tc" data-th="night"><i style="background:#191713;color:#ece5d6">Aa</i><span>夜读</span></button>
+          <button class="tc" data-th="navy"><i style="background:#141a23;color:#e3e9f1">Aa</i><span>墨蓝</span></button>
+          <button class="tc" data-th="ink"><i style="background:#0d0d0d;color:#e6e6e6">Aa</i><span>纯黑</span></button>
+        </div>
+        <div class="accs">
+          <span class="acclab">主色</span>
+          <button class="acc on"><span style="background:#b5401f"></span></button>
+          <button class="acc"><span style="background:#1f5f9e"></span></button>
+          <button class="acc"><span style="background:#2f6b55"></span></button>
+          <button class="acc"><span style="background:#6a4f9a"></span></button>
+          <button class="acc"><span style="background:#1c6f72"></span></button>
+          <button class="acc"><span style="background:#7d520f"></span></button>
+          <span class="auto">◐ 跟随系统</span>
+        </div>
+      </section>
+
+      <!-- 数据 -->
+      <section class="card" id="data">
+        <h2>数据 <span class="r">只在本机</span></h2>
+        <div class="usage"><div class="bar"><i></i></div><b>1.2 MB / 5 MB</b></div>
+        <div class="stat2">
+          <div><b>38</b><span>篇文章</span></div>
+          <div><b>412</b><span>生词</span></div>
+          <div><b>1,208</b><span>复习次数</span></div>
+        </div>
+        <div class="acts"><button class="btn">导出</button><button class="btn">导入</button><button class="btn danger">清空</button></div>
+        <p class="hint">备份不含 API Key；清空不可撤销。</p>
+      </section>
+    </div>
+  </div>
+
+  <div class="foot">
+    <a href="#">使用说明</a><a href="#">抓取与订阅源</a><a href="#">快捷键</a>
+    <span class="grow"></span>
+    <span>外刊精读 v1.6.1</span>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+$('#themeBtn').onclick = () => {
+  const dark = ['night', 'navy', 'ink'].includes(document.documentElement.dataset.theme);
+  applyTheme(dark ? 'paper' : 'night');
+};
+document.addEventListener('click', e => {
+  const b = e.target.closest('.seg button');
+  if (b) [...b.parentNode.children].forEach(x => x.classList.toggle('on', x === b));
+  const s = e.target.closest('[data-sw]'); if (s) s.classList.toggle('on');
+  const c = e.target.closest('.chip');
+  if (c) [...c.parentNode.children].forEach(x => x.classList.toggle('on', x === c));
+  const t = e.target.closest('.tc');
+  if (t) { [...t.parentNode.children].forEach(x => x.classList.toggle('on', x === t)); }
+  const a = e.target.closest('.acc');
+  if (a) [...a.parentNode.children].forEach(x => x.classList.toggle('on', x === a));
+});
+$('#eye').onclick = e => {
+  const i = $('#key');
+  i.type = i.type === 'password' ? 'text' : 'password';
+  e.target.textContent = i.type === 'password' ? '显示' : '隐藏';
+};
+/* 预览联动 */
+$('#segLayout').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  $('#pv').dataset.layout = b.dataset.v;
+  $('#fLy').textContent = { classic: '经典', annotated: '注释本', desk: '卡片' }[b.dataset.v];
+});
+$('#segFs').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const i = [...b.parentNode.children].indexOf(b);
+  document.documentElement.style.setProperty('--fs', i);
+  $('#fFs').textContent = ['小号 14px', '中号 16px', '大号 18px', '特大 20px'][i];
+});
+$('#segFf').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  $('#pv').style.setProperty('--read', [...b.parentNode.children].indexOf(b) ? 'var(--sans)' : 'var(--serif)');
+});
+$('#segTr').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const v = [...b.parentNode.children].indexOf(b);
+  $('#fTr').textContent = ['点译', '全译', '提示'][v];
+  $('#pvTr').classList.toggle('hide', v === 2);
+  $('#pvTr').textContent = v === 2 ? '' : '我们大多数人把休息当作工作的对立面——它是忙完正事之后才配得到的东西。';
+});
+</script>
+<script>
+/* 六套主题的完整色板：点色卡能真的换主题（样稿的 CSS 只内置了浅/深两套，其余在这里注入变量） */
+const THEME_PALETTES = {
+  paper: ['#f6f2ea','#eee8db','#fffdf7','#fbf7ee','#2c2822','#5d564a','#6f6558','#e2dac9','#d2c7ae','#b5401f','#933317','#f4e0d5','#8a3514','#fdf8f2','#4c7a4c','#e6efe2','#b3261e','#a06a1f'],
+  sepia: ['#f2e8d5','#e9dcc5','#fbf5e7','#f7f0e1','#3a3226','#6a5e4b','#6b6050','#ded0b6','#cdbb99','#a8551f','#8a4118','#efdbc2','#8a4118','#fdf8f2','#5c7a45','#e4ecda','#a8351f','#91661c'],
+  sage:  ['#e9efe5','#e0e8da','#f6f9f2','#f1f6ec','#222b21','#4c5948','#5c6855','#cfdbc8','#bcccb3','#a94a28','#8b3a1c','#ecdbd0','#8b3a1c','#fdf8f2','#4a7444','#dbe8d5','#a8351f','#8a651c'],
+  night: ['#191713','#211e18','#242019','#221e18','#ece5d6','#b6ac9a','#938877','#353026','#463f31','#e2714d','#e8845f','#3d281d','#ee9a78','#151310','#8fb98c','#2a332a','#f08a7f','#cfa054'],
+  navy:  ['#141a23','#1a212c','#1f2836','#1c2430','#e3e9f1','#a8b4c5','#88919e','#2a3441','#3a4658','#e07a5c','#f0a086','#34262a','#f0a086','#151310','#7fb08a','#1f2a29','#f08a7f','#d0a35c'],
+  ink:   ['#0d0d0d','#0a0a0a','#151515','#101010','#e6e6e6','#a3a3a3','#808080','#232323','#333333','#e05a3a','#ef9077','#2a1a16','#ef9077','#151310','#7fae86','#16211a','#f08a7f','#cfa05c'],
+};
+const VAR_KEYS = ['paper','paper-2','card','card-2','ink','ink-2','ink-3','line','line-2','accent','accent-deep','accent-soft','accent-ink','on-accent','ok','ok-bg','danger','warn'];
+function applyTheme(id) {
+  if (id === 'auto') id = matchMedia('(prefers-color-scheme: dark)').matches ? 'night' : 'paper';
+  const p = THEME_PALETTES[id] || THEME_PALETTES.paper;
+  const root = document.documentElement;
+  VAR_KEYS.forEach((k, i) => root.style.setProperty('--' + k, p[i]));
+  root.dataset.theme = id;
+  const NAMES = { paper:'纸白', sepia:'米黄', sage:'护眼绿', night:'夜读', navy:'墨蓝', ink:'纯黑' };
+  const lab = document.getElementById('pillTheme');
+  if (lab) lab.textContent = NAMES[id] || id;
+  const btn = document.getElementById('themeBtn');
+  if (btn) btn.textContent = ['night', 'navy', 'ink'].includes(id) ? '纸白' : '夜读';
+}
+document.addEventListener('click', e => {
+  const card = e.target.closest('[data-th]');
+  if (card) applyTheme(card.dataset.th);
+});
+</script>
+</body>
+</html>

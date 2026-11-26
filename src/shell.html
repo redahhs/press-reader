@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>外刊精读 · Close Reading</title>
+<meta name="description" content="基于国际报刊的英语精读学习工具：分段翻译、生词标注、听力精听、闪卡复习。">
+<meta name="theme-color" content="#f7f3ec">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="13" fill="%23b5401f"/><text x="32" y="44" font-size="34" text-anchor="middle" fill="%23f7f3ec" font-family="Georgia,serif" font-weight="bold">刊</text></svg>'>
+<script>
+/* 提前应用主题，避免刷新时闪一下浅色 */
+(function(){try{
+  var KEYS=['paper','sepia','sage','night','navy','ink'], DARK=['night','navy','ink'];
+  var d=JSON.parse(localStorage.getItem('pressreader.v1'));
+  var mode=(d&&d.settings&&d.settings.theme)||'auto';
+  var t=mode;
+  if(t==='light')t='paper';
+  if(t==='dark')t='night';
+  if(t==='auto'||KEYS.indexOf(t)<0) t = matchMedia('(prefers-color-scheme: dark)').matches?'night':'paper';
+  document.documentElement.dataset.theme=t;
+  document.documentElement.dataset.themeMode=mode;
+  if(DARK.indexOf(t)>=0) document.documentElement.dataset.dark='1';
+  var ac=(d&&d.settings&&d.settings.accent)||'coral';
+  if(ac!=='coral' && ['ocean','pine','iris','teal','amber'].indexOf(ac)>=0) document.documentElement.dataset.accent=ac;
+}catch(e){document.documentElement.dataset.theme='paper';}})();
+</script>
+<!--__CSS__-->
+</head>
+<body>
+<div id="app">
+  <aside id="rail">
+    <a class="brand" href="#/library">
+      <span class="brand-mark">刊</span>
+      <span class="brand-name">外刊精读<em>Close Reading</em></span>
+    </a>
+    <nav class="rail-nav" id="railNav">
+      <a href="#/library" data-nav="library">__ICON__lib<span>文章库</span></a>
+      <a href="#/shelf" data-nav="shelf">__ICON__shelf<span>刊物</span></a>
+      <a href="#/words" data-nav="words">__ICON__words<span>生词本</span></a>
+      <a href="#/review" data-nav="review">__ICON__review<span>复习</span><b class="due-badge" id="dueBadge1" hidden></b></a>
+      <a href="#/settings" data-nav="settings">__ICON__gear<span>设置</span></a>
+    </nav>
+    <div class="rail-foot">
+      <button class="theme-toggle" id="themeBtn" title="切换主题">__ICON__eye<span>纸白 / 夜读</span></button>
+      <p class="rail-ver">v1.9 · 数据仅存本机</p>
+    </div>
+  </aside>
+
+  <main id="main"></main>
+
+  <nav id="tabbar">
+    <a href="#/library" data-nav="library">__ICON__lib<span>文章</span></a>
+    <a href="#/shelf" data-nav="shelf">__ICON__shelf<span>刊物</span></a>
+    <a href="#/words" data-nav="words">__ICON__words<span>生词</span></a>
+    <a href="#/review" data-nav="review">__ICON__review<span>复习</span><b class="due-badge" id="dueBadge2" hidden></b></a>
+    <a href="#/settings" data-nav="settings">__ICON__gear<span>设置</span></a>
+  </nav>
+</div>
+<div id="layer" aria-live="polite"></div>
+<!--__JS__-->
+</body>
+</html>

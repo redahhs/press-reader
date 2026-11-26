@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>方案 B · 注释本</title>
+<style>
+/* ============================================================
+   方案 B —「注释本」Annotated Edition
+   核心：正文留一条外栏，把本篇生词像古籍眉批一样挂在段落旁边。
+   不点不打扰，抬眼就有；译文默认收起，保持版面干净。
+   ============================================================ */
+:root{
+  --paper:#f5f0e4;
+  --ink:#221f19;
+  --ink-2:#4e4739;
+  --ink-3:#6f6553;
+  --line:#ddd3bd;
+  --line-2:#c6b99c;
+  --accent:#8f2f1a;
+  --serif:"Sitka Text",Charter,"Iowan Old Style",Georgia,"Songti SC",serif;
+  --sans:"Segoe UI","PingFang SC","Microsoft YaHei UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--serif);}
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(ellipse at 50% -10%, rgba(143,47,26,.05), transparent 55%),
+    radial-gradient(ellipse at 90% 100%, rgba(143,47,26,.04), transparent 50%);
+}
+.badge{
+  position:fixed; right:14px; bottom:14px; z-index:60;
+  font-family:var(--sans); font-size:9.5px; letter-spacing:1.3px; text-transform:uppercase;
+  background:var(--ink); color:var(--paper); padding:5px 9px; border-radius:99px; opacity:.4;
+}
+
+.wrap{position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:0 40px 130px}
+
+/* ---------- 标题页 ---------- */
+.head{padding:56px 0 0; max-width:900px}
+.kick{
+  font-family:var(--sans); font-size:10px; letter-spacing:3.6px; text-transform:uppercase;
+  color:var(--accent); font-weight:700;
+}
+h1{
+  font-size:clamp(34px,4.6vw,62px); line-height:1.08; font-weight:600;
+  letter-spacing:-.02em; margin:16px 0 0; text-wrap:balance;
+}
+.sub{
+  display:flex; align-items:center; gap:14px; margin:22px 0 0;
+  font-family:var(--sans); font-size:11px; letter-spacing:1.6px; text-transform:uppercase; color:var(--ink-3);
+}
+.sub i{flex:1; height:1px; background:var(--line-2)}
+.dek{
+  font-size:17px; line-height:1.72; color:var(--ink-2); margin:24px 0 0; max-width:38em;
+  font-style:italic;
+}
+.dbl-rule{margin:34px 0 0; border-top:1px solid var(--line-2); border-bottom:3px double var(--line-2); height:5px}
+
+/* ---------- 条目（正文 + 外栏） ---------- */
+.entries{margin-top:38px}
+.entry{
+  display:grid; grid-template-columns:minmax(0,604px) 274px; column-gap:56px;
+  padding:24px 0 8px;
+}
+.txt{font-size:18.5px; line-height:1.82; text-align:justify; hyphens:auto; -webkit-hyphens:auto;
+  font-variant-numeric:oldstyle-nums;}
+.txt p{margin:0 0 1em}
+.txt p:last-child{margin-bottom:0}
+.entry.first .txt > p:first-of-type::first-letter{
+  float:left; font-size:54px; line-height:.88; padding:5px 11px 0 0; color:var(--accent); font-weight:600;
+}
+.entry.first .txt > p:first-of-type{text-indent:0}
+
+/* 段号 + 译（放在段落上方，正文首字母才能吃到首字下沉） */
+.phead{display:flex; align-items:center; gap:9px; margin-bottom:9px}
+.phead .no{
+  font-family:var(--sans); font-size:10.5px; letter-spacing:1.4px; color:var(--ink-3);
+  font-variant-numeric:tabular-nums;
+}
+.phead .rule-mini{flex:1; height:1px; background:var(--line)}
+.phead .tr-btn{
+  font-family:var(--sans); font-size:10.5px; border:1px solid var(--line-2); background:transparent;
+  color:var(--ink-3); border-radius:5px; padding:1px 7px; cursor:pointer; line-height:1.5;
+}
+.phead .tr-btn:hover{border-color:var(--accent); color:var(--accent)}
+.phead .tr-btn.on{background:var(--accent); border-color:var(--accent); color:#fdf8f2}
+
+.tr{display:none; margin:14px 0 6px; padding-left:16px; border-left:2px solid var(--line-2)}
+.tr p{margin:0; font-family:var(--sans); font-size:14px; line-height:2; color:var(--ink-2); letter-spacing:.012em; text-align:left}
+.entry.show-tr .tr{display:block; animation:fade .2s ease}
+@keyframes fade{from{opacity:0; transform:translateY(-2px)}to{opacity:1; transform:none}}
+
+/* 词 */
+.w{font-weight:inherit; border-bottom:1px solid rgba(143,47,26,.32); cursor:pointer; transition:background .12s}
+.w:hover,.w.hot{background:#ecdccd}
+.w.done{border-bottom-style:dotted; border-bottom-color:rgba(143,47,26,.5)}
+
+/* ---------- 外栏 ---------- */
+.marg{
+  font-family:var(--sans); font-size:11.5px; line-height:1.55; color:var(--ink-2);
+  border-left:1px solid var(--line); padding:2px 0 2px 14px; align-self:start;
+}
+.marg .cap{
+  font-size:9.5px; letter-spacing:2.2px; text-transform:uppercase; color:var(--ink-3);
+  margin-bottom:8px; display:block;
+}
+.marg .m{
+  display:block; padding:4px 0; cursor:pointer; border-bottom:1px dotted transparent;
+}
+.marg .m:hover{color:var(--accent); border-bottom-color:var(--line-2)}
+.marg .m b{font-weight:600; font-size:12px; letter-spacing:.01em}
+.marg .m .p{color:var(--ink-3); font-size:10px; margin-left:5px; font-style:italic; font-family:var(--serif)}
+.marg .m .z{display:block; color:var(--ink-3); font-size:11px; line-height:1.5; margin-top:2px; text-wrap:pretty}
+.marg .m.on{color:var(--accent)}
+
+/* ---------- 引文 ---------- */
+.pull{
+  margin:40px 0; padding:26px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+  font-size:clamp(21px,2.6vw,29px); line-height:1.5; font-style:italic; color:var(--ink);
+  text-align:center; max-width:840px;
+}
+.pull span{display:block; font-family:var(--sans); font-size:11px; font-style:normal; letter-spacing:2px;
+  text-transform:uppercase; color:var(--ink-3); margin-top:16px}
+
+/* ---------- 尾 ---------- */
+.tail{margin-top:44px; padding-top:18px; border-top:3px double var(--line-2);
+  display:flex; justify-content:space-between; gap:18px; flex-wrap:wrap;
+  font-family:var(--sans); font-size:12px; color:var(--ink-3)}
+.tail b{color:var(--ink); font-weight:600}
+
+/* ---------- 词卡 ---------- */
+.card{
+  position:absolute; z-index:70; width:308px; max-width:calc(100vw - 24px);
+  background:#fffdf6; border:1px solid var(--line-2); border-radius:10px;
+  box-shadow:0 2px 4px rgba(34,31,25,.07), 0 20px 44px -18px rgba(34,31,25,.4);
+  padding:15px 16px 13px; display:none;
+}
+.card.show{display:block}
+.card .hd{display:flex; align-items:baseline; gap:8px; flex-wrap:wrap}
+.card .wd{font-size:19px; font-weight:600}
+.card .ph{font-size:12px; color:var(--ink-3)}
+.card .tag{font-family:var(--sans); font-size:9.5px; padding:1px 6px; border-radius:99px; background:#ece4d3; color:var(--ink-2)}
+.card .mn{font-family:var(--sans); font-size:13.5px; line-height:1.7; margin-top:7px}
+.card .ft{font-family:var(--sans); font-size:10.5px; color:var(--ink-3); margin-top:9px; border-top:1px solid var(--line); padding-top:7px}
+
+@media (max-width:1080px){
+  .wrap{padding:0 22px 90px}
+  .entry{grid-template-columns:1fr; row-gap:14px}
+  .marg{border-left:0; border-top:1px solid var(--line); padding:12px 0 0; display:flex; flex-wrap:wrap; gap:6px 14px}
+  .marg .cap{width:100%; margin-bottom:2px}
+  .marg .m{padding:2px 0; display:inline-flex; align-items:baseline; gap:4px}
+  .marg .m .z{display:none}
+  .txt{font-size:17.5px}
+  .entry.first .txt > p:first-of-type::first-letter{font-size:58px}
+}
+</style>
+</head>
+<body>
+<div class="badge">方案 B · 注释本</div>
+<div class="card" id="card"></div>
+
+<div class="wrap">
+  <header class="head">
+    <div class="kick">Press Reader · Essay</div>
+    <h1>The Quiet Rebellion of Doing Nothing</h1>
+    <div class="sub"><span>2026 年 9 月号</span><i></i><span>540 词 · C1 · 26 个生词</span></div>
+    <p class="dek">我们花了一百年把「等待」从生活里删干净，然后奇怪为什么再也想不出好点子。</p>
+    <div class="dbl-rule"></div>
+  </header>
+
+  <div class="entries" id="entries"></div>
+
+  <footer class="tail">
+    <div><b>本篇小结</b> · 26 个生词 · 密度 4.8% · 停留 12 分钟</div>
+    <div>复习本篇生词 →</div>
+  </footer>
+</div>
+
+<script>
+const ARTICLE = {
+  paras: [
+    {en:"Not long ago, waiting was an unavoidable part of ordinary life. We waited in lines, waited for buses, waited for friends who were late. These small interludes were treated as dead time — moments to be endured rather than savored. The smartphone has quietly abolished them. Every idle second can now be filled with a scroll, a swipe, a video, and most of us fill it without ever deciding to.",
+     zh:"不久以前，等待还是日常生活里绕不开的一部分。我们排队、等公交、等迟到的朋友。这些短暂的间歇曾被当作「死时间」——是拿来忍受、而非品味的时刻。而智能手机悄无声息地废除了它们。如今每一秒空闲都能被一次滑动、一次刷屏、一段视频填满，而且我们大多数人根本未经决定，就把它们填满了。"},
+    {en:"We are told that this is progress, that an unoccupied mind is a wasted one. But a growing body of research suggests the opposite: the idle brain does some of its most important work precisely when nothing is happening. When we are bored, the mind drifts, and in that drifting it consolidates memories, rehearses possible futures, and stumbles onto ideas that a packed schedule would never permit. Psychologists call this the default mode network; poets simply call it daydreaming.",
+     zh:"有人告诉我们这是进步，说闲着的大脑就是浪费的大脑。但越来越多的研究指向相反的结论：恰恰在无事发生的时候，无所事事的大脑在做一些最重要的工作。当我们感到无聊，思绪开始游荡，而在这游荡之中，大脑巩固记忆、预演种种可能的未来，还会偶然撞上排得满满的日程永远不会允许的念头。心理学家称之为「默认模式网络」；诗人则干脆称之为白日梦。"},
+    {en:"The cost of constant stimulation is easy to describe and hard to measure. Attention, like a muscle, can atrophy. Each fleeting hit of novelty delivers a small dose of gratification, and the threshold for what counts as interesting creeps steadily upward. Tasks that reward patience — reading a novel, learning an instrument, writing anything honest — begin to feel not merely difficult but vaguely humiliating, because they demand exactly the sustained focus we are losing practice at.",
+     zh:"持续刺激的代价，说起来容易，衡量起来很难。注意力像肌肉一样，是会萎缩的。每一次转瞬即逝的新鲜感都送来一小剂满足，而「什么才算有趣」的门槛则不知不觉地稳步上移。那些奖赏耐心的活动——读一部长篇、学一门乐器、写点诚实的东西——开始让人觉得不只是困难，简直隐隐有些丢脸，因为它们要求的，恰恰是我们正日渐生疏的持续专注。"},
+    {en:"None of this is an argument for smashing your phone. The device is not the villain; the habit is. The question is whether we can carve out spaces in the day that remain deliberately unfilled — not optimized, not gamified, simply empty. Boredom, it turns out, is not the absence of meaning but a kind of appetite for it. Monotony is the soil in which imagination, given nothing else to eat, finally begins to grow.",
+     zh:"这一切并不是要你砸掉手机。设备不是罪魁祸首，习惯才是。问题在于：我们能否在一天中开辟出一些刻意留白的空间——不去优化、不做游戏化，只是空着。事实证明，无聊并非意义的缺席，而是对意义的一种胃口。单调是想象力的土壤：当别无可食之时，想象力终于开始生长。"},
+    {en:"The Victorians understood this instinctively. They defended the Sunday walk, the solitary hobby, the long handwritten letter — not as escapes from productive life but as its quiet foundation. Solitude, they suspected, was where a self was slowly assembled; being alone with one’s own thoughts now looks, from the far side of the feed, almost heroic.",
+     zh:"维多利亚时代的人凭直觉明白这一点。他们守护周日的散步、独自的爱好、手写的长信——这些不是对有效率生活的逃避，而是它安静的根基。他们猜想，独处正是一个自我被慢慢塑造的地方；如今在信息流的另一端回望，与自己独处这件事，几乎称得上英勇。"},
+    {en:"To reclaim that territory we do not need a cabin in the woods, only a small ritual: the walk without headphones, the commute with the phone in the bag, the first ten minutes of the morning left unclaimed by any screen. The mind will protest. It has been trained to expect a reward every few seconds, and it will ask, loudly, whether this stillness is not a waste. That question is the starting line.",
+     zh:"要收回那片领地，我们并不需要林间小屋，只需要一个小小的仪式：不戴耳机的散步、把手机放进包里的通勤、清晨头十分钟不交给任何屏幕。念头会抗议。它已被训练成每隔几秒就期待一次奖赏，它会大声追问：这么静着，难道不是浪费吗？而那个问题，正是起跑线。"},
+    {en:"What lies beyond the protest is not bliss but something better: capability. Attention that has been allowed to wander comes back wider. Reading, once the mind has settled, stops being a confrontation and becomes a conversation. The page is patient in a way that almost nothing else in modern life is, and that patience — so conspicuously absent from our feeds — turns out to be exactly what deep learning requires.",
+     zh:"抗议声过后等着的并非极乐，而是更好的东西：能力。被允许游荡过的注意力，回来时会更开阔。一旦心定了下来，阅读不再是一场对抗，而成为一场对话。书页以一种现代生活中几乎绝无仅有的方式耐心，而那种在我们的信息流里显眼缺席的耐心，恰恰是深度学习最需要的东西。"},
+    {en:"So waste a little time this week, on purpose. Sit in the park with nothing. Let the boredom rise and do not answer it. The ideas that arrive uninvited, in the silence we keep fleeing, are usually the ones worth keeping. Doing nothing, it turns out, is how we finally do something.",
+     zh:"所以，这周不妨故意浪费一点时间。坐在公园里，什么都不带。让无聊升起来，别去回应它。那些在我们一直逃离的寂静里不请自来的念头，往往才是值得留下的。无所作为，到头来恰恰是我们真正有所作为的方式。"}
+  ]
+};
+
+const WORDS = [
+  {w:'interlude', f:['interludes'], pos:'n.', ph:'/ˈɪntərluːd/', zh:'间歇；幕间；插曲', p:0, lv:'考研'},
+  {w:'savor', f:['savored'], pos:'v.', ph:'/ˈseɪvər/', zh:'品味；细细体会', p:0, lv:'托福'},
+  {w:'abolish', f:['abolished'], pos:'v.', ph:'/əˈbɑːlɪʃ/', zh:'废除（制度、习俗）', p:0, lv:'CET-6'},
+  {w:'idle', f:['idle'], pos:'adj.', ph:'/ˈaɪdl/', zh:'空闲的；无所事事的', p:0, lv:'CET-6'},
+  {w:'consolidate', f:['consolidates'], pos:'v.', ph:'/kənˈsɑːlɪdeɪt/', zh:'巩固；合并', p:1, lv:'考研'},
+  {w:'rehearse', f:['rehearses'], pos:'v.', ph:'/rɪˈhɜːrs/', zh:'排练；（心里）预演', p:1, lv:'专八'},
+  {w:'stumble on', f:['stumbles onto'], pos:'phr.', ph:'', zh:'偶然发现；无意中碰上', p:1, lv:'考研'},
+  {w:'atrophy', f:['atrophy'], pos:'v.', ph:'/ˈætrəfi/', zh:'萎缩，衰退', p:2, lv:'GRE'},
+  {w:'fleeting', f:['fleeting'], pos:'adj.', ph:'/ˈfliːtɪŋ/', zh:'转瞬即逝的', p:2, lv:'雅思'},
+  {w:'novelty', f:['novelty'], pos:'n.', ph:'/ˈnɑːvlti/', zh:'新奇（感）', p:2, lv:'CET-6'},
+  {w:'gratification', f:['gratification'], pos:'n.', ph:'/ˌɡrætɪfɪˈkeɪʃn/', zh:'满足感', p:2, lv:'考研'},
+  {w:'threshold', f:['threshold'], pos:'n.', ph:'/ˈθreʃhoʊld/', zh:'门槛；阈限', p:2, lv:'CET-6'},
+  {w:'humiliating', f:['humiliating'], pos:'adj.', ph:'/hjuːˈmɪlieɪtɪŋ/', zh:'使人蒙羞的', p:2, lv:'专八'},
+  {w:'sustained', f:['sustained'], pos:'adj.', ph:'/səˈsteɪnd/', zh:'持续的', p:2, lv:'CET-6'},
+  {w:'villain', f:['villain'], pos:'n.', ph:'/ˈvɪlən/', zh:'反派；罪魁祸首', p:3, lv:'考研'},
+  {w:'carve out', f:['carve out'], pos:'phr.', ph:'', zh:'开辟出；争取到', p:3, lv:'考研'},
+  {w:'deliberate', f:['deliberately'], pos:'adj.', ph:'/dɪˈlɪbərət/', zh:'故意的；深思熟虑的', p:3, lv:'CET-6'},
+  {w:'monotony', f:['monotony'], pos:'n.', ph:'/məˈnɑːtəni/', zh:'单调，千篇一律', p:3, lv:'CET-6'},
+  {w:'gamify', f:['gamified'], pos:'v.', ph:'/ˈɡeɪmɪfaɪ/', zh:'使游戏化', p:3, lv:'超纲'},
+  {w:'instinctively', f:['instinctively'], pos:'adv.', ph:'/ɪnˈstɪŋktɪvli/', zh:'本能地', p:4, lv:'CET-6'},
+  {w:'solitary', f:['solitary'], pos:'adj.', ph:'/ˈsɑːləteri/', zh:'独自的；喜独处的', p:4, lv:'CET-6'},
+  {w:'solitude', f:['solitude'], pos:'n.', ph:'/ˈsɑːlətuːd/', zh:'独处；孤独', p:4, lv:'专八'},
+  {w:'reclaim', f:['reclaim'], pos:'v.', ph:'/rɪˈkleɪm/', zh:'收回；重新获得', p:5, lv:'托福'},
+  {w:'bliss', f:['bliss'], pos:'n.', ph:'/blɪs/', zh:'极乐，至福', p:6, lv:'专八'},
+  {w:'confrontation', f:['confrontation'], pos:'n.', ph:'/ˌkɑːnfrənˈteɪʃn/', zh:'对抗，对峙', p:6, lv:'考研'},
+  {w:'conspicuous', f:['conspicuously'], pos:'adj.', ph:'/kənˈspɪkjuəs/', zh:'显眼的，惹人注目的', p:6, lv:'托福'}
+];
+
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rx = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+function renderEN(text, pi){
+  const list = WORDS.filter(x => x.p === pi);
+  const holds = [];
+  let t = esc(text);
+  const mark = (needle, key) => {
+    if (!needle) return;
+    const re = new RegExp('\\b' + rx(esc(needle)) + '\\b', 'gi');
+    t = t.replace(re, m => {
+      holds.push('<b class="w" data-k="' + esc(key) + '">' + m + '</b>');
+      return '\u0002' + (holds.length - 1) + '\u0003';
+    });
+  };
+  list.filter(x => x.w.includes(' ')).forEach(x => { mark(x.w, x.w); (x.f || []).forEach(f => mark(f, x.w)); });
+  list.filter(x => !x.w.includes(' ')).forEach(x => { mark(x.w, x.w); (x.f || []).forEach(f => mark(f, x.w)); });
+  return t.replace(/\u0002(\d+)\u0003/g, (_, i) => holds[+i]);
+}
+
+const entries = document.getElementById('entries');
+const PULL = `<figure class="pull">「无聊并非意义的缺席，而是对意义的一种胃口。」<span>— 第 4 段</span></figure>`;
+
+entries.innerHTML = ARTICLE.paras.map((p, i) => {
+  const ws = WORDS.filter(x => x.p === i);
+  const marg = ws.length ? `
+    <aside class="marg">
+      <span class="cap">本段 ${ws.length} 词</span>
+      ${ws.map(w => `<span class="m" data-k="${esc(w.w)}"><b>${esc(w.w)}</b><em class="p">${esc(w.pos)}</em><span class="z">${esc(w.zh)}</span></span>`).join('')}
+    </aside>` : '';
+  return `
+  ${i === 3 ? PULL : ''}
+  <article class="entry${i === 0 ? ' first' : ''}" data-p="${i}">
+    <div class="txt">
+      <div class="phead">
+        <span class="no">${String(i + 1).padStart(2, '0')}</span>
+        <span class="rule-mini"></span>
+        <button class="tr-btn" data-tr="${i}">译</button>
+      </div>
+      <p>${renderEN(p.en, i)}</p>
+      <div class="tr"><p>${esc(p.zh)}</p></div>
+    </div>
+    ${marg}
+  </article>`;
+}).join('');
+
+/* 译文切换 */
+entries.querySelectorAll('.tr-btn').forEach(b => b.onclick = () => {
+  const art = b.closest('.entry');
+  const on = art.classList.toggle('show-tr');
+  b.classList.toggle('on', on);
+  b.textContent = on ? '收起' : '译';
+});
+
+/* 词卡 + 外栏联动 */
+const card = document.getElementById('card');
+function showCard(el, anchor){
+  const w = WORDS.find(x => x.w === el.dataset.k);
+  if (!w) return;
+  card.innerHTML = `
+    <div class="hd"><span class="wd">${esc(w.w)}</span>${w.ph ? `<span class="ph">${esc(w.ph)}</span>` : ''}
+      <span class="tag">${esc(w.lv)}</span><span class="tag">${esc(w.pos)}</span></div>
+    <div class="mn">${esc(w.zh)}</div>
+    <div class="ft">已加入生词本 · 点空白处关闭</div>`;
+  card.classList.add('show');
+  const r = anchor.getBoundingClientRect();
+  const cw = card.offsetWidth, ch = card.offsetHeight;
+  let left = r.left + scrollX + r.width / 2 - cw / 2;
+  left = Math.max(12, Math.min(innerWidth - cw - 12, left));
+  let top = r.bottom + scrollY + 10;
+  if (r.bottom + ch + 24 > innerHeight) top = r.top + scrollY - ch - 10;
+  card.style.left = left + 'px';
+  card.style.top = Math.max(8, top) + 'px';
+  document.querySelectorAll('.w.hot,.marg .m.on').forEach(n => n.classList.remove('hot', 'on'));
+  el.classList.add('hot');
+}
+document.addEventListener('click', e => {
+  const inText = e.target.closest('.w');
+  const inMarg = e.target.closest('.marg .m');
+  if (inText) {
+    const k = inText.dataset.k;
+    document.querySelectorAll('.marg .m').forEach(m => m.classList.toggle('on', m.dataset.k === k));
+    showCard(inText, inText); return;
+  }
+  if (inMarg) {
+    inMarg.classList.add('on');
+    const t = document.querySelector(`.w[data-k="${CSS.escape(inMarg.dataset.k)}"]`);
+    if (t) showCard(t, inMarg);
+    return;
+  }
+  card.classList.remove('show');
+  document.querySelectorAll('.w.hot,.marg .m.on').forEach(n => n.classList.remove('hot', 'on'));
+});
+addEventListener('scroll', () => card.classList.remove('show'), { passive: true });
+</script>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>方案 1 · 沉浸式</title>
+<style>
+/* ============================================================
+   方案 1 —「沉浸式」Immersive
+   阅读时屏幕上一件多余的东西都没有：没有工具栏、没有底栏、没有进度条。
+   控件收进底部一颗胶囊（拇指可及），滚动时自动淡出，停下再浮回来。
+   点词不从上方弹卡（会挡住正在读的那行），从下方升一张抽屉。
+   ============================================================ */
+:root{
+  --paper:#f7f3ea; --ink:#221f19; --ink-2:#4e4a40; --ink-3:#7b7365;
+  --line:#e6ddc9; --card:#fffdf7; --accent:#b5401f;
+  --serif:"Iowan Old Style",Charter,"Sitka Text",Georgia,"Songti SC",serif;
+  --sans:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei UI",sans-serif;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{margin:0; height:100%}
+body{
+  background:#111013; display:grid; place-items:center; padding:28px 16px;
+  font-family:var(--sans); color:#fff;
+}
+.stage{display:flex; flex-direction:column; align-items:center; gap:14px}
+.cap{font-size:12px; letter-spacing:1.6px; color:#8b8794; text-transform:uppercase}
+.cap b{color:#fff; font-weight:600; letter-spacing:0; text-transform:none; font-size:13px}
+
+/* 手机外框 */
+.phone{
+  width:390px; height:844px; border-radius:46px; padding:9px;
+  background:linear-gradient(160deg,#3a3a42,#141418 60%);
+  box-shadow:0 30px 80px -20px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.06) inset;
+  position:relative;
+}
+.screen{
+  position:relative; width:100%; height:100%; border-radius:38px; overflow:hidden;
+  background:var(--paper); color:var(--ink); display:flex; flex-direction:column;
+}
+.island{
+  position:absolute; top:9px; left:50%; transform:translateX(-50%);
+  width:104px; height:26px; border-radius:14px; background:#0b0b0d; z-index:30;
+}
+.statusbar{
+  height:46px; flex:none; display:flex; align-items:flex-end; justify-content:space-between;
+  padding:0 22px 4px; font-size:12.5px; font-weight:600; color:var(--ink); z-index:20;
+}
+.statusbar .icons{display:flex; gap:5px; align-items:center; opacity:.85}
+.statusbar .icons svg{width:15px; height:15px}
+
+/* 顶部进度：1.5px，几乎看不见但与视线同步 */
+.progress{height:1.5px; background:transparent; flex:none; margin:0 22px}
+.progress i{display:block; height:100%; width:0; background:var(--accent); opacity:.55; border-radius:2px; transition:width .1s linear}
+
+/* 正文 */
+.read{flex:1; overflow-y:auto; padding:6px 24px 150px; scroll-behavior:smooth; -webkit-overflow-scrolling:touch}
+.read::-webkit-scrollbar{display:none}
+.kicker{font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); font-weight:700; margin-top:10px}
+h1{font-family:var(--serif); font-size:30px; line-height:1.24; font-weight:600; letter-spacing:-.01em; margin:12px 0 10px}
+.meta{display:flex; gap:10px; font-size:11.5px; color:var(--ink-3); margin-bottom:26px}
+.meta span+span::before{content:"·"; margin-right:10px; color:var(--line)}
+
+.p{font-family:var(--serif); font-size:18.5px; line-height:1.82; margin:0 0 1.35em; color:var(--ink)}
+.p .zh{
+  display:none; font-family:var(--sans); font-size:14px; line-height:1.95; color:var(--ink-2);
+  margin-top:10px; padding-left:11px; border-left:2px solid var(--line);
+}
+body.show-zh .p .zh{display:block}
+
+.w{border-bottom:1px solid rgba(181,64,31,.4); padding-bottom:.5px; cursor:pointer}
+.w:active{background:#f1e0d5}
+
+/* 底部渐隐：正文滚到胶囊后面时淡出，而不是隔着磨砂玻璃露出来 */
+.screen::after{
+  content:""; position:absolute; left:0; right:0; bottom:0; height:130px; z-index:22;
+  background:linear-gradient(rgba(247,243,234,0), var(--paper) 58%);
+  pointer-events:none;
+}
+/* 底部胶囊：拇指区，半透明磨砂 */
+.pill{
+  position:absolute; left:50%; bottom:26px; transform:translateX(-50%);
+  display:flex; align-items:center; gap:2px; padding:6px; z-index:25;
+  background:rgba(255,253,247,.86); backdrop-filter:blur(18px) saturate(1.4);
+  border:1px solid rgba(0,0,0,.07); border-radius:99px;
+  box-shadow:0 10px 30px -8px rgba(40,30,20,.35);
+  transition:opacity .25s, transform .25s;
+}
+.pill.dim{opacity:.12; transform:translateX(-50%) translateY(6px)}
+.pill button{
+  width:52px; height:44px; border:0; background:transparent; border-radius:99px;
+  display:grid; place-items:center; color:var(--ink-2); font-family:var(--sans);
+  font-size:13px; cursor:pointer;
+}
+.pill button:active{background:rgba(0,0,0,.06)}
+.pill button.on{background:var(--ink); color:var(--paper)}
+.pill .sep{width:1px; height:20px; background:rgba(0,0,0,.1); margin:0 3px}
+.pill svg{width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round}
+
+/* 抽屉：词卡 / 目录 */
+.sheet{
+  position:absolute; left:0; right:0; bottom:0; z-index:40;
+  background:var(--card); border-radius:22px 22px 0 0;
+  box-shadow:0 -18px 50px -12px rgba(40,30,20,.4);
+  transform:translateY(102%); transition:transform .28s cubic-bezier(.2,.8,.2,1);
+  padding:10px 22px 30px; max-height:72%;
+}
+.sheet.open{transform:none}
+.grab{width:38px; height:4px; border-radius:2px; background:var(--line); margin:0 auto 14px}
+.sheet h3{margin:0; font-family:var(--serif); font-size:24px; font-weight:600}
+.sheet .ph{font-size:12.5px; color:var(--ink-3); margin-left:8px}
+.sheet .tags{display:flex; gap:6px; margin:10px 0 12px}
+.sheet .tag{font-size:10px; padding:2px 8px; border-radius:99px; background:#f0e9da; color:var(--ink-2)}
+.sheet .mn{font-size:15px; line-height:1.8; color:var(--ink)}
+.sheet .ex{margin-top:14px; font-family:var(--serif); font-size:14px; line-height:1.75; color:var(--ink-2); padding-left:11px; border-left:2px solid var(--line)}
+.sheet .acts{display:flex; gap:10px; margin-top:18px}
+.sheet .acts button{flex:1; height:48px; border-radius:12px; font-size:14px; cursor:pointer}
+.btn-ghost{border:1px solid var(--line); background:transparent; color:var(--ink-2)}
+.btn-solid{border:0; background:var(--ink); color:var(--paper)}
+.toc-list{margin-top:6px; max-height:340px; overflow:auto}
+.toc-item{display:flex; gap:10px; align-items:baseline; width:100%; text-align:left; border:0; background:transparent;
+  padding:12px 2px; border-bottom:1px solid var(--line); cursor:pointer; color:var(--ink-2); font-size:13px; line-height:1.6}
+.toc-item b{font-family:var(--sans); font-size:10.5px; color:var(--ink-3); flex:none}
+.toc-item:active{background:#f6f1e6}
+.mask{position:absolute; inset:0; background:rgba(20,16,10,.28); z-index:35; opacity:0; pointer-events:none; transition:opacity .25s}
+.mask.on{opacity:1; pointer-events:auto}
+
+@media (max-width:700px){
+  body{padding:0; display:block; background:var(--paper)}
+  .stage{gap:0}
+  .cap{display:none}
+  .phone{width:100%; height:100dvh; border-radius:0; padding:0; background:var(--paper); box-shadow:none}
+  .screen{border-radius:0; height:100dvh}
+  .island{display:none}
+  .statusbar{height:env(safe-area-inset-top, 24px); min-height:24px}
+  .pill{bottom:calc(18px + env(safe-area-inset-bottom, 0px))}
+}
+</style>
+</head>
+<body>
+<div class="stage">
+  <figure class="phone" style="margin:0">
+    <div class="screen">
+      <div class="island"></div>
+      <div class="statusbar">
+        <span>9:41</span>
+        <span class="icons">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 17h3v4H2zm5-4h3v8H7zm5-4h3v12h-3zm5-4h3v16h-3z"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 9.5a12 12 0 0 1 16 0M7 13a8 8 0 0 1 10 0M10 16.5a4 4 0 0 1 4 0"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="7" width="17" height="10" rx="2.5"/><rect x="4" y="9" width="11" height="6" rx="1" fill="currentColor" stroke="none"/><path d="M21 10.5v3"/></svg>
+        </span>
+      </div>
+      <div class="progress"><i id="bar"></i></div>
+      <div class="read" id="read"></div>
+      <div class="pill" id="pill">
+        <button id="btnZh">译</button>
+        <span class="sep"></span>
+        <button id="btnFont" style="font-family:var(--serif); font-size:15px">Aa</button>
+        <button id="btnToc" title="段落"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg></button>
+        <span class="sep"></span>
+        <button id="btnMore" title="设置"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button>
+      </div>
+      <div class="mask" id="mask"></div>
+      <div class="sheet" id="sheet"></div>
+    </div>
+  </figure>
+  <figcaption class="cap"><b>方案 1 · 沉浸式</b> · 无工具栏，控件收进底部胶囊 · 点带下划线的词试试</figcaption>
+</div>
+
+<script>
+const PARAS = [
+  {en:"Not long ago, waiting was an unavoidable part of ordinary life. We waited in lines, waited for buses, waited for friends who were late. These small interludes were treated as dead time — moments to be endured rather than savored. The smartphone has quietly abolished them.",
+   zh:"不久以前，等待还是日常生活里绕不开的一部分。我们排队、等公交、等迟到的朋友。这些短暂的间歇曾被当作「死时间」——是拿来忍受、而非品味的时刻。而智能手机悄无声息地废除了它们。"},
+  {en:"We are told that this is progress, that an unoccupied mind is a wasted one. But a growing body of research suggests the opposite: the idle brain does some of its most important work precisely when nothing is happening.",
+   zh:"有人告诉我们这是进步，说闲着的大脑就是浪费的大脑。但越来越多的研究指向相反的结论：恰恰在无事发生的时候，无所事事的大脑在做一些最重要的工作。"},
+  {en:"The cost of constant stimulation is easy to describe and hard to measure. Attention, like a muscle, can atrophy. Each fleeting hit of novelty delivers a small dose of gratification, and the threshold for what counts as interesting creeps steadily upward.",
+   zh:"持续刺激的代价，说起来容易，衡量起来很难。注意力像肌肉一样，是会萎缩的。每一次转瞬即逝的新鲜感都送来一小剂满足，而「什么才算有趣」的门槛则不知不觉地稳步上移。"},
+  {en:"None of this is an argument for smashing your phone. The device is not the villain; the habit is. The question is whether we can carve out spaces in the day that remain deliberately unfilled.",
+   zh:"这一切并不是要你砸掉手机。设备不是罪魁祸首，习惯才是。问题在于：我们能否在一天中开辟出一些刻意留白的空间。"}
+];
+const WORDS = {
+  interlude:{ph:'/ˈɪntərluːd/', pos:'n.', lv:'考研', zh:'（两件事之间的）间歇；插曲',
+    ex:'These small interludes were treated as dead time.', exzh:'这些短暂的间歇曾被当作「死时间」。'},
+  abolish:{ph:'/əˈbɑːlɪʃ/', pos:'v.', lv:'CET-6', zh:'废除（制度、习俗）；取消',
+    ex:'The smartphone has quietly abolished them.', exzh:'而智能手机悄无声息地废除了它们。'},
+  idle:{ph:'/ˈaɪdl/', pos:'adj.', lv:'CET-6', zh:'空闲的；无所事事的',
+    ex:'the idle brain does its most important work', exzh:'无所事事的大脑在做最重要的工作'},
+  atrophy:{ph:'/ˈætrəfi/', pos:'v.', lv:'GRE', zh:'（能力、肌肉）萎缩，衰退',
+    ex:'Attention, like a muscle, can atrophy.', exzh:'注意力像肌肉一样，是会萎缩的。'},
+  fleeting:{ph:'/ˈfliːtɪŋ/', pos:'adj.', lv:'雅思', zh:'转瞬即逝的',
+    ex:'Each fleeting hit of novelty', exzh:'每一次转瞬即逝的新鲜感'},
+  threshold:{ph:'/ˈθreʃhoʊld/', pos:'n.', lv:'CET-6', zh:'门槛；阈限',
+    ex:'the threshold for what counts as interesting', exzh:'「什么才算有趣」的门槛'},
+  villain:{ph:'/ˈvɪlən/', pos:'n.', lv:'考研', zh:'反派；罪魁祸首',
+    ex:'The device is not the villain; the habit is.', exzh:'设备不是罪魁祸首，习惯才是。'}
+};
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function hl(text){
+  let t = esc(text);
+  Object.keys(WORDS).forEach(k => {
+    t = t.replace(new RegExp('\\b' + k + '(?:s|es|ed|d|ing)?\\b', 'gi'), m => `<span class="w" data-k="${k}">${m}</span>`);
+  });
+  return t;
+}
+
+const read = document.getElementById('read');
+read.innerHTML = `
+  <div class="kicker">Press Reader · Essay</div>
+  <h1>The Quiet Rebellion of Doing Nothing</h1>
+  <div class="meta"><span>2026 年 9 月号</span><span>540 词</span><span>26 个生词</span></div>
+  ${PARAS.map(p => `<p class="p">${hl(p.en)}<span class="zh">${esc(p.zh)}</span></p>`).join('')}
+`;
+
+/* 进度 */
+const bar = document.getElementById('bar');
+read.addEventListener('scroll', () => {
+  const h = read.scrollHeight - read.clientHeight;
+  bar.style.width = (h > 0 ? (read.scrollTop / h) * 100 : 0) + '%';
+  pill.classList.add('dim');
+  clearTimeout(window.__t);
+  window.__t = setTimeout(() => pill.classList.remove('dim'), 420);
+}, { passive: true });
+
+/* 胶囊：译文 / 字号 / 目录 */
+const pill = document.getElementById('pill');
+document.getElementById('btnZh').onclick = e => {
+  document.body.classList.toggle('show-zh');
+  e.currentTarget.classList.toggle('on', document.body.classList.contains('show-zh'));
+};
+
+let fs = 18.5;
+const btnFont = document.getElementById('btnFont');
+btnFont.onclick = () => {
+  const seq = [18.5, 20.5, 22.5, 17];
+  fs = seq[(seq.indexOf(fs) + 1) % seq.length];
+  document.querySelectorAll('.p').forEach(p => p.style.fontSize = fs + 'px');
+  btnFont.textContent = fs >= 22 ? 'Aa+' : 'Aa';
+};
+
+const sheet = document.getElementById('sheet');
+const mask = document.getElementById('mask');
+const closeSheet = () => { sheet.classList.remove('open'); mask.classList.remove('on'); };
+mask.onclick = closeSheet;
+
+read.addEventListener('click', e => {
+  const w = e.target.closest('.w');
+  if (!w) return;
+  const d = WORDS[w.dataset.k];
+  if (!d) return;
+  sheet.innerHTML = `
+    <div class="grab"></div>
+    <h3>${esc(w.textContent)}<span class="ph">${esc(d.ph)}</span></h3>
+    <div class="tags"><span class="tag">${esc(d.lv)}</span><span class="tag">${esc(d.pos)}</span></div>
+    <div class="mn">${esc(d.zh)}</div>
+    <div class="ex">${esc(d.ex)}<br><span style="color:#8a8172">${esc(d.exzh)}</span></div>
+    <div class="acts"><button class="btn-ghost" id="skSay">朗读</button><button class="btn-solid" id="skAdd">加入生词本</button></div>`;
+  sheet.classList.add('open'); mask.classList.add('on');
+  sheet.querySelector('#skSay').onclick = () => speak(w.textContent);
+  sheet.querySelector('#skAdd').onclick = () => { closeSheet(); toast('已加入生词本'); };
+});
+
+document.getElementById('btnToc').onclick = () => {
+  sheet.innerHTML = `<div class="grab"></div>
+    <h3 style="font-size:19px; margin-bottom:10px">本篇 · ${PARAS.length} 段</h3>
+    <div class="toc-list">${PARAS.map((p, i) =>
+      `<button class="toc-item" data-i="${i}"><b>${String(i+1).padStart(2,'0')}</b>${esc(p.en.slice(0, 34))}…</button>`).join('')}</div>`;
+  sheet.classList.add('open'); mask.classList.add('on');
+  sheet.querySelectorAll('.toc-item').forEach(b => b.onclick = () => {
+    closeSheet();
+    document.querySelectorAll('.p')[+b.dataset.i].scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+};
+
+document.getElementById('btnMore').onclick = () => {
+  sheet.innerHTML = `<div class="grab"></div>
+    <h3 style="font-size:19px">阅读设置</h3>
+    <div class="toc-list">
+      <button class="toc-item"><b>字体</b>衬线 · 点右侧切换</button>
+      <button class="toc-item"><b>行距</b>1.82（当前）</button>
+      <button class="toc-item"><b>背景</b>纸白</button>
+    </div>`;
+  sheet.classList.add('open'); mask.classList.add('on');
+};
+
+function speak(t){ if (window.speechSynthesis) { const u = new SpeechSynthesisUtterance(t); u.lang = 'en-US'; speechSynthesis.speak(u); } }
+function toast(m){
+  const t = document.createElement('div');
+  t.textContent = m;
+  t.style.cssText = 'position:absolute;left:50%;bottom:96px;transform:translateX(-50%);background:rgba(34,31,25,.92);color:#fff;padding:10px 16px;border-radius:99px;font-size:13px;z-index:50';
+  document.querySelector('.screen').appendChild(t);
+  setTimeout(() => t.remove(), 1800);
+}
+</script>
+</body>
+</html>

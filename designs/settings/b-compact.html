@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="paper">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>设置 · 方案 B 紧凑单页</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --paper:#f6f2ea;--paper-2:#eee8db;--card:#fffdf7;
+  --ink:#2c2822;--ink-2:#5d564a;--ink-3:#6f6558;
+  --line:#e2dac9;--line-2:#d2c7ae;
+  --accent:#b5401f;--accent-deep:#933317;--accent-soft:#f4e0d5;--accent-ink:#8a3514;--on-accent:#fdf8f2;
+  --ok:#4c7a4c;--ok-bg:#e6efe2;--danger:#b3261e;--warn:#a06a1f;
+  --serif:"Sitka Text",Charter,"Iowan Old Style",Georgia,"Noto Serif","Times New Roman",STSong,serif;
+  --sans:"Segoe UI Variable Text","Segoe UI",-apple-system,BlinkMacSystemFont,system-ui,"PingFang SC","Microsoft YaHei UI","Microsoft YaHei",sans-serif;
+  --r:9px;
+}
+[data-theme="night"]{
+  --paper:#191713;--paper-2:#211e18;--card:#242019;
+  --ink:#ece5d6;--ink-2:#b6ac9a;--ink-3:#938877;
+  --line:#353026;--line-2:#463f31;
+  --accent:#e2714d;--accent-deep:#e8845f;--accent-soft:#3d281d;--accent-ink:#ee9a78;--on-accent:#151310;
+  --ok:#8fb98c;--ok-bg:#2a332a;--danger:#f08a7f;--warn:#cfa054;
+}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:14px;line-height:1.6}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+a{color:inherit;text-decoration:none}
+
+/* 顶栏 */
+.top{display:flex;align-items:center;gap:12px;height:46px;padding:0 18px;border-bottom:1px solid var(--line);background:var(--paper-2);font-size:12.5px;color:var(--ink-3)}
+.top .back{padding:4px 9px;border-radius:6px;color:var(--accent-ink);font-weight:600}
+.top .back:hover{background:var(--card)}
+.top .grow{flex:1}
+.top .tag{border:1px solid var(--line-2);border-radius:99px;padding:2px 8px;font-size:11px}
+.tbtn{padding:5px 11px;border:1px solid var(--line-2);border-radius:99px;background:var(--card);font-size:12px;color:var(--ink-2)}
+
+/* 页头（吸顶） */
+.page{max-width:940px;margin:0 auto;padding:0 26px 70px}
+.head{position:sticky;top:0;z-index:20;background:var(--paper);padding:20px 0 12px;border-bottom:1px solid var(--line)}
+.hrow{display:flex;align-items:baseline;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.hrow h1{font-size:23px;font-weight:700;letter-spacing:.3px}
+.hrow .sub{font-size:12px;color:var(--ink-3)}
+.tools{display:flex;align-items:center;gap:8px;margin-top:13px;flex-wrap:wrap}
+.search{flex:1;min-width:180px;display:flex;align-items:center;gap:7px;padding:0 11px;border:1px solid var(--line-2);border-radius:99px;background:var(--card)}
+.search svg{width:15px;height:15px;color:var(--ink-3);flex:none}
+.search input{flex:1;border:0;outline:none;background:transparent;padding:7px 0;font-size:13px;color:var(--ink)}
+.fchip{padding:5px 11px;border:1px solid var(--line-2);border-radius:99px;font-size:12px;color:var(--ink-2);background:var(--card)}
+.fchip.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.cnt{font-size:11.5px;color:var(--ink-3);margin-left:auto;white-space:nowrap}
+
+/* 分组 */
+.group{margin-top:24px}
+.gh{display:flex;align-items:baseline;gap:9px;margin-bottom:2px}
+.gh h2{font-size:12px;letter-spacing:1.6px;text-transform:uppercase;font-weight:700;color:var(--ink-3)}
+.gh .n{font-size:10.5px;color:var(--ink-3);background:var(--paper-2);border-radius:99px;padding:1px 7px}
+.gh .state{margin-left:auto;font-size:11px;color:var(--ink-3)}
+.group.empty{display:none}
+
+.r{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 20px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.group .r:first-of-type{border-top:0}
+.r.hide{display:none}
+.lb b{display:block;font-size:13.5px;font-weight:600;letter-spacing:.1px}
+.lb span{display:block;font-size:11.5px;color:var(--ink-3);line-height:1.5;margin-top:1px}
+.r .ctl{display:flex;align-items:center;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.withbtn{display:flex;gap:8px;width:100%;max-width:420px}
+.withbtn .input{flex:1;min-width:0;width:auto}
+.r.wide{grid-template-columns:1fr}
+.r.wide .ctl{justify-content:flex-start;margin-top:8px}
+
+.input{padding:6px 10px;border:1px solid var(--line-2);border-radius:8px;background:var(--card);font-size:13px;color:var(--ink)}
+.input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 13%,transparent)}
+.input.url{width:300px}
+.input.model{width:170px}
+.input.key{width:280px}
+select.input{padding:6px 8px;max-width:230px}
+.btn{padding:5px 12px;border:1px solid var(--line-2);border-radius:8px;background:var(--card);font-size:12.5px;color:var(--ink-2)}
+.btn:hover{border-color:var(--ink-3);color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600}
+.btn.danger{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 34%,var(--line-2))}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:99px;overflow:hidden;background:var(--card)}
+.seg button{padding:4px 10px;font-size:12px;color:var(--ink-3)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--ink);color:var(--paper)}
+.sw{width:36px;height:21px;border-radius:99px;background:var(--line-2);position:relative;transition:background .15s;flex:none}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;background:var(--card);box-shadow:0 1px 2px rgba(0,0,0,.18);transition:left .15s}
+.sw.on{background:var(--accent)} .sw.on::after{left:17px}
+.dotok{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--ok)}
+.dotok i{width:6px;height:6px;border-radius:50%;background:var(--ok)}
+
+/* 芯片行 */
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{padding:4px 10px;border:1px solid var(--line-2);border-radius:99px;font-size:12px;color:var(--ink-2);background:var(--card)}
+.chip.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
+
+/* 主题 / 主色 */
+.swatches{display:flex;gap:7px;flex-wrap:wrap}
+.tc{display:flex;align-items:center;gap:6px;padding:3px 9px 3px 4px;border:1px solid var(--line-2);border-radius:99px;background:var(--card);font-size:11.5px;color:var(--ink-2)}
+.tc.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft);color:var(--accent-ink);font-weight:600}
+.tc i{width:20px;height:20px;border-radius:50%;display:block;font-style:normal;font-size:10px;display:grid;place-items:center;border:1px solid var(--line);font-family:var(--serif);font-weight:700}
+.acc{width:24px;height:24px;border-radius:50%;border:2px solid transparent;background-clip:padding-box;padding:0}
+.acc span{display:block;width:100%;height:100%;border-radius:50%}
+.acc.on{border-color:var(--ink-3)}
+
+/* 版式缩略 */
+.lay{display:flex;gap:8px;flex-wrap:wrap}
+.lay button{width:104px;border:1px solid var(--line-2);border-radius:9px;background:var(--card);padding:6px;text-align:left}
+.lay button.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.lay .m{height:40px;border-radius:5px;background:var(--paper-2);margin-bottom:5px;padding:5px;display:grid;gap:3px}
+.lay .m i{display:block;height:3px;border-radius:2px;background:var(--line-2)}
+.lay .m .sp{grid-template-columns:1fr 26px;display:grid;gap:3px}
+.lay .m .sp .side{background:var(--line);border-radius:2px}
+.lay b{font-size:11.5px;display:block}
+.lay small{font-size:10px;color:var(--ink-3)}
+
+/* 说明 */
+details{margin-top:24px;border-top:1px solid var(--line);padding-top:12px}
+summary{cursor:pointer;list-style:none;font-size:12.5px;font-weight:600;color:var(--ink-2);display:flex;justify-content:space-between}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"展开";font-size:11px;color:var(--accent-ink);font-weight:400}
+details[open] summary::after{content:"收起"}
+details .body{margin-top:12px;display:grid;gap:10px}
+details .body p{font-size:12.5px;color:var(--ink-2);line-height:1.8}
+details .body b{color:var(--ink)}
+.danger-note{font-size:11.5px;color:var(--warn);margin-top:8px}
+.hintline{font-size:11px;color:var(--ink-3);margin-top:4px}
+@media (max-width:760px){
+  .page{padding:0 16px 60px}
+  .r{grid-template-columns:1fr}
+  .r .ctl{justify-content:flex-start}
+  .input.url,.input.model,.input.key{width:100%}
+  .withbtn{max-width:none}
+  .withbtn .input{width:auto}
+  .search{min-width:140px}
+  .cnt{display:none}
+  .top .tag{display:none}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="back" href="index.html">← 方案对比</a>
+  <span>设置</span><span class="tag">方案 B · 紧凑单页</span>
+  <span class="grow"></span>
+  <button class="tbtn" id="themeBtn">夜读</button>
+</header>
+
+<div class="page">
+  <div class="head">
+    <div class="hrow">
+      <h1>设置</h1>
+      <span class="sub">所有改动即时保存 · 数据只在本机</span>
+    </div>
+    <div class="tools">
+      <label class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="6"/><path d="M15.5 15.5 20 20"/></svg>
+        <input id="q" placeholder="搜索设置：字号、代理、Key、清空…" autocomplete="off">
+      </label>
+      <button class="fchip on" data-f="all">全部</button>
+      <button class="fchip" data-f="common">常用</button>
+      <span class="cnt" id="cnt">6 组 · 24 项</span>
+    </div>
+  </div>
+
+  <!-- AI -->
+  <section class="group">
+    <div class="gh"><h2>AI 服务</h2><span class="n">5</span><span class="state dotok"><i></i>已连接</span></div>
+    <div class="r" data-k="服务商 预设 智谱 openai deepseek kimi 硅基">
+      <div class="lb"><b>服务商</b><span>一键填好地址与模型名</span></div>
+      <div class="ctl chips">
+        <button class="chip on">智谱 AI</button><button class="chip">OpenAI</button><button class="chip">DeepSeek</button><button class="chip">Kimi</button><button class="chip">硅基流动</button>
+      </div>
+    </div>
+    <div class="r" data-k="base url 接口 地址" data-adv="1">
+      <div class="lb"><b>Base URL</b><span>完整地址，去掉结尾的 /chat/completions</span></div>
+      <div class="ctl"><input class="input url" value="https://open.bigmodel.cn/api/paas/v4"></div>
+    </div>
+    <div class="r" data-k="模型 model glm" data-adv="1">
+      <div class="lb"><b>模型名</b><span>写错会返回 400</span></div>
+      <div class="ctl"><input class="input model" value="glm-4.6"></div>
+    </div>
+    <div class="r" data-k="api key 密钥 令牌">
+      <div class="lb"><b>API Key</b><span>只存在本机；导出的备份不含它</span></div>
+      <div class="ctl"><div class="withbtn"><input class="input key" type="password" value="example-api-key" id="key"><button class="btn" id="eye">显示</button></div></div>
+    </div>
+    <div class="r" data-k="测试 连接 保存">
+      <div class="lb"><b>连接</b><span>测试会真的发一次最短请求</span></div>
+      <div class="ctl"><button class="btn">测试连接</button><button class="btn primary">保存</button></div>
+    </div>
+  </section>
+
+  <!-- 词汇 -->
+  <section class="group">
+    <div class="gh"><h2>词汇与译文</h2><span class="n">3</span></div>
+    <div class="r" data-k="基准 水平 等级 cet 标注">
+      <div class="lb"><b>生词标注基准</b><span>高于这个水平的词会被标注</span></div>
+      <div class="ctl"><div class="seg"><button>CET-4</button><button class="on">CET-6</button><button>专八</button></div></div>
+    </div>
+    <div class="r" data-k="复习词 cet4 cet6 点线">
+      <div class="lb"><b>同时标注复习词</b><span>CET-4/6 大纲内、学过但可能忘了的词</span></div>
+      <div class="ctl"><button class="sw on" data-sw></button></div>
+    </div>
+    <div class="r" data-k="译文 显示 点译 全译 提示">
+      <div class="lb"><b>译文默认显示</b><span>提示模式只给本段关键词，卡住再看整段</span></div>
+      <div class="ctl"><div class="seg"><button class="on">点译</button><button>全译</button><button>提示</button></div></div>
+    </div>
+  </section>
+
+  <!-- 排版 -->
+  <section class="group">
+    <div class="gh"><h2>排版</h2><span class="n">4</span></div>
+    <div class="r" data-k="字号 大小 大 小">
+      <div class="lb"><b>阅读字号</b><span>只影响正文，不影响界面</span></div>
+      <div class="ctl"><div class="seg"><button>小</button><button class="on">中</button><button>大</button><button>特大</button></div></div>
+    </div>
+    <div class="r" data-k="字体 衬线 无衬线 serif sans">
+      <div class="lb"><b>正文字体</b><span>衬线接近印刷品，无衬线更清晰</span></div>
+      <div class="ctl"><div class="seg"><button class="on">衬线</button><button>无衬线</button></div></div>
+    </div>
+    <div class="r" data-k="分页 滚动 翻页">
+      <div class="lb"><b>分页阅读</b><span>每页 2–3 段；仅经典版式生效</span></div>
+      <div class="ctl"><button class="sw on" data-sw></button></div>
+    </div>
+    <div class="r wide" data-k="版式 注释本 卡片 经典 布局">
+      <div class="lb"><b>阅读版式</b><span>版式决定信息怎么排，颜色跟着主题走</span></div>
+      <div class="ctl lay">
+        <button class="on"><div class="m"><i></i><i></i><i style="width:70%"></i></div><b>经典</b><small>段落后跟译文</small></button>
+        <button><div class="m"><div class="sp"><div><i></i><i></i><i style="width:70%"></i></div><div class="side"></div></div></div><b>注释本</b><small>正文 + 右词注</small></button>
+        <button><div class="m"><div class="sp"><div><i></i><i></i></div><div class="side"></div></div></div><b>卡片</b><small>段落卡 + 词汇栏</small></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 外观 -->
+  <section class="group">
+    <div class="gh"><h2>外观</h2><span class="n">2</span></div>
+    <div class="r" data-k="主题 纸白 米黄 护眼 夜读 墨蓝 纯黑 深色">
+      <div class="lb"><b>主题</b><span>只换纸张与墨色</span></div>
+      <div class="ctl swatches">
+        <button class="tc on" data-th="paper"><i style="background:#f6f2ea;color:#2c2822">Aa</i>纸白</button>
+        <button class="tc" data-th="sepia"><i style="background:#f2e8d5;color:#3a3226">Aa</i>米黄</button>
+        <button class="tc" data-th="sage"><i style="background:#e9efe5;color:#222b21">Aa</i>护眼绿</button>
+        <button class="tc" data-th="night"><i style="background:#191713;color:#ece5d6">Aa</i>夜读</button>
+        <button class="tc" data-th="navy"><i style="background:#141a23;color:#e3e9f1">Aa</i>墨蓝</button>
+        <button class="tc" data-th="ink"><i style="background:#0d0d0d;color:#e6e6e6">Aa</i>纯黑</button>
+        <button class="tc" data-th="auto">◐ 跟随系统</button>
+      </div>
+    </div>
+    <div class="r" data-k="主色 强调色 朱砂 海蓝 松绿 藤紫">
+      <div class="lb"><b>界面主色</b><span>按钮与强调色；报错永远是红色</span></div>
+      <div class="ctl swatches">
+        <button class="acc on" title="朱砂"><span style="background:#b5401f"></span></button>
+        <button class="acc" title="海蓝"><span style="background:#1f5f9e"></span></button>
+        <button class="acc" title="松绿"><span style="background:#2f6b55"></span></button>
+        <button class="acc" title="藤紫"><span style="background:#6a4f9a"></span></button>
+        <button class="acc" title="湖青"><span style="background:#1c6f72"></span></button>
+        <button class="acc" title="琥珀"><span style="background:#7d520f"></span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 网络与朗读 -->
+  <section class="group">
+    <div class="gh"><h2>网络与朗读</h2><span class="n">3</span></div>
+    <div class="r" data-k="代理 proxy clash v2ray 7890" data-adv="1">
+      <div class="lb"><b>抓取代理</b><span>只接受本机地址；留空则自动探测</span></div>
+      <div class="ctl"><div class="withbtn"><input class="input" value="http://127.0.0.1:7890"><button class="btn">检测</button></div></div>
+    </div>
+    <div class="r" data-k="音色 tts 声音 朗读">
+      <div class="lb"><b>朗读音色</b><span>来自系统；Windows 用 Edge 有自然音色</span></div>
+      <div class="ctl"><div class="withbtn"><select class="input"><option>Samantha（en-US · 本地）</option><option>Microsoft Aria（en-US · 在线）</option></select><button class="btn">试听</button></div></div>
+    </div>
+    <div class="r" data-k="语速 速度 倍速">
+      <div class="lb"><b>默认语速</b><span>听力页里也能临时改</span></div>
+      <div class="ctl"><div class="seg"><button>0.6×</button><button>0.8×</button><button class="on">1.0×</button><button>1.2×</button></div></div>
+    </div>
+  </section>
+
+  <!-- 数据 -->
+  <section class="group">
+    <div class="gh"><h2>数据</h2><span class="n">1</span><span class="state">已用 1.2 MB / 5 MB</span></div>
+    <div class="r" data-k="导出 导入 备份 清空 删除">
+      <div class="lb"><b>备份与重置</b><span>备份不含 API Key；清空不可撤销</span></div>
+      <div class="ctl"><button class="btn">导出全部数据</button><button class="btn">导入数据</button><button class="btn danger">清空</button></div>
+    </div>
+  </section>
+
+  <details>
+    <summary>使用说明与其它</summary>
+    <div class="body">
+      <p><b>四步上手</b>：① 填 Key → ② 挑一篇（订阅源 / 链接 / 直接粘正文）→ ③ 精读页点词收词、开句子解析 → ④ 听力精听 + 每天清空到期闪卡。</p>
+      <p><b>抓取</b>：内置 8 个实测能拿到完整正文的 RSS 源；大西洋月刊会被 Cloudflare 拦，用「取正文」书签。</p>
+      <p><b>快捷键</b>：阅读页 ← → 翻页；听力页空格播放、← → 切句；复习页空格翻面、1–4 评分；Esc 关闭浮层。</p>
+    </div>
+  </details>
+</div>
+
+<script>
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+$('#themeBtn').onclick = () => {
+  const dark = ['night', 'navy', 'ink'].includes(document.documentElement.dataset.theme);
+  applyTheme(dark ? 'paper' : 'night');
+};
+document.addEventListener('click', e => {
+  const b = e.target.closest('.seg button');
+  if (b) [...b.parentNode.children].forEach(x => x.classList.toggle('on', x === b));
+  const s = e.target.closest('[data-sw]'); if (s) s.classList.toggle('on');
+  const c = e.target.closest('.chip');
+  if (c) [...c.parentNode.children].forEach(x => x.classList.toggle('on', x === c));
+  const l = e.target.closest('.lay button');
+  if (l) [...l.parentNode.children].forEach(x => x.classList.toggle('on', x === l));
+  const t = e.target.closest('.tc');
+  if (t) [...t.parentNode.children].forEach(x => x.classList.toggle('on', x === t));
+  const a = e.target.closest('.acc');
+  if (a) [...a.parentNode.children].forEach(x => x.classList.toggle('on', x === a));
+});
+$('#eye').onclick = e => {
+  const i = $('#key');
+  i.type = i.type === 'password' ? 'text' : 'password';
+  e.target.textContent = i.type === 'password' ? '显示' : '隐藏';
+};
+/* 搜索 + 过滤：这是 B 方案不靠折叠也不怕项多的关键 */
+const rows = $$('.r'), groups = $$('.group');
+let filter = 'all';
+function apply() {
+  const q = $('#q').value.trim().toLowerCase();
+  rows.forEach(r => {
+    const adv = r.dataset.adv === '1';
+    const okQ = !q || (r.dataset.k || '').toLowerCase().includes(q) || r.textContent.toLowerCase().includes(q);
+    const okF = filter === 'all' || !adv;
+    r.classList.toggle('hide', !(okQ && okF));
+  });
+  let shown = 0;
+  groups.forEach(g => {
+    const n = g.querySelectorAll('.r:not(.hide)').length;
+    g.querySelector('.n').textContent = n;
+    g.classList.toggle('empty', n === 0);
+    shown += n;
+  });
+  $('#cnt').textContent = `${groups.filter(g => !g.classList.contains('empty')).length} 组 · ${shown} 项`;
+}
+$('#q').addEventListener('input', apply);
+$$('.fchip').forEach(b => b.onclick = () => {
+  $$('.fchip').forEach(x => x.classList.toggle('on', x === b));
+  filter = b.dataset.f; apply();
+});
+apply();
+</script>
+<script>
+/* 六套主题的完整色板：点色卡能真的换主题（样稿的 CSS 只内置了浅/深两套，其余在这里注入变量） */
+const THEME_PALETTES = {
+  paper: ['#f6f2ea','#eee8db','#fffdf7','#fbf7ee','#2c2822','#5d564a','#6f6558','#e2dac9','#d2c7ae','#b5401f','#933317','#f4e0d5','#8a3514','#fdf8f2','#4c7a4c','#e6efe2','#b3261e','#a06a1f'],
+  sepia: ['#f2e8d5','#e9dcc5','#fbf5e7','#f7f0e1','#3a3226','#6a5e4b','#6b6050','#ded0b6','#cdbb99','#a8551f','#8a4118','#efdbc2','#8a4118','#fdf8f2','#5c7a45','#e4ecda','#a8351f','#91661c'],
+  sage:  ['#e9efe5','#e0e8da','#f6f9f2','#f1f6ec','#222b21','#4c5948','#5c6855','#cfdbc8','#bcccb3','#a94a28','#8b3a1c','#ecdbd0','#8b3a1c','#fdf8f2','#4a7444','#dbe8d5','#a8351f','#8a651c'],
+  night: ['#191713','#211e18','#242019','#221e18','#ece5d6','#b6ac9a','#938877','#353026','#463f31','#e2714d','#e8845f','#3d281d','#ee9a78','#151310','#8fb98c','#2a332a','#f08a7f','#cfa054'],
+  navy:  ['#141a23','#1a212c','#1f2836','#1c2430','#e3e9f1','#a8b4c5','#88919e','#2a3441','#3a4658','#e07a5c','#f0a086','#34262a','#f0a086','#151310','#7fb08a','#1f2a29','#f08a7f','#d0a35c'],
+  ink:   ['#0d0d0d','#0a0a0a','#151515','#101010','#e6e6e6','#a3a3a3','#808080','#232323','#333333','#e05a3a','#ef9077','#2a1a16','#ef9077','#151310','#7fae86','#16211a','#f08a7f','#cfa05c'],
+};
+const VAR_KEYS = ['paper','paper-2','card','card-2','ink','ink-2','ink-3','line','line-2','accent','accent-deep','accent-soft','accent-ink','on-accent','ok','ok-bg','danger','warn'];
+function applyTheme(id) {
+  if (id === 'auto') id = matchMedia('(prefers-color-scheme: dark)').matches ? 'night' : 'paper';
+  const p = THEME_PALETTES[id] || THEME_PALETTES.paper;
+  const root = document.documentElement;
+  VAR_KEYS.forEach((k, i) => root.style.setProperty('--' + k, p[i]));
+  root.dataset.theme = id;
+  const NAMES = { paper:'纸白', sepia:'米黄', sage:'护眼绿', night:'夜读', navy:'墨蓝', ink:'纯黑' };
+  const lab = document.getElementById('pillTheme');
+  if (lab) lab.textContent = NAMES[id] || id;
+  const btn = document.getElementById('themeBtn');
+  if (btn) btn.textContent = ['night', 'navy', 'ink'].includes(id) ? '纸白' : '夜读';
+}
+document.addEventListener('click', e => {
+  const card = e.target.closest('[data-th]');
+  if (card) applyTheme(card.dataset.th);
+});
+</script>
+</body>
+</html>

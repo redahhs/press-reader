@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="paper">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>设置页 · 四个方向</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --paper:#f6f2ea;--paper-2:#eee8db;--card:#fffdf7;
+  --ink:#2c2822;--ink-2:#5d564a;--ink-3:#6f6558;
+  --line:#e2dac9;--line-2:#d2c7ae;
+  --accent:#b5401f;--accent-deep:#933317;--accent-soft:#f4e0d5;--accent-ink:#8a3514;--on-accent:#fdf8f2;
+  --ok:#4c7a4c;--ok-bg:#e6efe2;
+  --serif:"Sitka Text",Charter,"Iowan Old Style",Georgia,"Noto Serif","Times New Roman",STSong,serif;
+  --sans:"Segoe UI Variable Text","Segoe UI",-apple-system,BlinkMacSystemFont,system-ui,"PingFang SC","Microsoft YaHei UI","Microsoft YaHei",sans-serif;
+}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:14.5px;line-height:1.7}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1080px;margin:0 auto;padding:44px 26px 80px}
+
+.mast{display:flex;align-items:baseline;justify-content:space-between;gap:16px;border-bottom:2.5px solid var(--ink);padding-bottom:14px;margin-bottom:26px;flex-wrap:wrap}
+.mast .k{font-size:11px;letter-spacing:2.6px;text-transform:uppercase;color:var(--accent-ink);font-weight:700}
+.mast .d{font-size:12px;color:var(--ink-3)}
+h1{font-family:var(--serif);font-size:clamp(28px,4vw,40px);line-height:1.2;letter-spacing:.2px;margin:14px 0 10px}
+h1 .dot{color:var(--accent)}
+.lede{color:var(--ink-2);max-width:680px;font-size:14.5px}
+.lede b{color:var(--ink)}
+
+.now{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--line);margin:26px 0 34px}
+.now div{background:var(--card);padding:14px 16px}
+.now b{display:block;font-family:var(--serif);font-size:23px;line-height:1.2}
+.now span{font-size:11.5px;color:var(--ink-3)}
+.now div.bad b{color:var(--accent)}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--card);overflow:hidden;display:flex;flex-direction:column;transition:transform .15s,box-shadow .2s}
+.card:hover{transform:translateY(-2px);box-shadow:0 18px 40px -30px rgba(40,30,20,.55)}
+.shot{height:196px;background:var(--paper-2);border-bottom:1px solid var(--line);padding:16px;position:relative;overflow:hidden}
+.shot .lab{position:absolute;top:10px;right:12px;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.body{padding:18px 20px 20px;display:flex;flex-direction:column;gap:8px;flex:1}
+.body h2{font-size:18px;font-weight:700;letter-spacing:.2px;display:flex;align-items:center;gap:8px}
+.tagx{font-size:10.5px;font-weight:700;letter-spacing:.5px;color:var(--on-accent);background:var(--accent);border-radius:99px;padding:1px 7px}
+.body p{font-size:12.5px;color:var(--ink-3);line-height:1.75}
+.body .kv{display:flex;gap:8px;font-size:11.5px;color:var(--ink-3);margin-top:2px;flex-wrap:wrap}
+.body .kv b{color:var(--ink-2);font-weight:600}
+.body .go{margin-top:auto;padding-top:14px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 15px;border:1px solid var(--line-2);border-radius:9px;background:var(--card);font-size:13px;color:var(--ink-2);font-weight:500}
+.btn:hover{border-color:var(--ink-3);color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600}
+.btn.primary:hover{background:var(--accent-deep);color:var(--on-accent)}
+
+/* ---------- 缩略线框 ---------- */
+.wf{height:100%;font-size:0}
+.ln{height:4px;border-radius:2px;background:var(--line-2);display:block}
+.ln.t{height:5px;background:var(--ink-3);opacity:.45}
+.box{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:7px;display:grid;gap:5px;align-content:start}
+.pillrow{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.pill{height:7px;width:30px;border-radius:99px;background:var(--line-2);flex:none}
+.pill.sel{background:var(--accent-soft);border:1px solid var(--accent)}
+.imp{height:8px;border-radius:2px;border:1px solid var(--line-2);background:var(--paper)}
+
+/* A：两栏 */
+.wf-a{display:grid;grid-template-columns:66px 1fr;gap:8px;height:100%}
+.wf-a .side{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:7px 6px;display:grid;gap:5px;align-content:start}
+.wf-a .nav{height:11px;border-radius:3px;display:flex;align-items:center;padding:0 4px}
+.wf-a .nav.on{background:var(--accent-soft);border-left:2px solid var(--accent)}
+.wf-a .nav i{display:block;height:3px;width:70%;border-radius:2px;background:var(--line-2)}
+.wf-a .main{display:grid;gap:7px;align-content:start}
+.wf-a .fld{display:grid;grid-template-columns:1fr 44px;gap:6px;align-items:center}
+
+/* B：紧凑单页 */
+.wf-b{display:grid;gap:7px;align-content:start;height:100%}
+.wf-b .search{height:13px;border-radius:99px;background:var(--card);border:1px solid var(--line-2)}
+.wf-b .g{display:grid;gap:4px}
+.wf-b .r{display:grid;grid-template-columns:1fr 34px;gap:6px;align-items:center;border-top:1px solid var(--line);padding-top:4px}
+.wf-b .r:first-of-type{border-top:0;padding-top:0}
+
+/* C：控制台 */
+.wf-c{display:grid;grid-template-columns:1.1fr .9fr;gap:6px;height:100%;align-content:start}
+.wf-c .hero{grid-column:1/-1;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:7px;display:grid;grid-template-columns:1fr 108px;gap:9px;height:74px}
+.wf-c .hero .l{display:grid;gap:5px;align-content:start}
+.wf-c .pv{background:var(--paper-2);border:1px solid var(--line);border-radius:4px}
+.wf-c .mini{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:6px;display:grid;gap:5px;align-content:start}
+
+/* D：一列 + 抽屉 */
+.wf-d{display:grid;place-items:center;height:100%}
+.wf-d .phone{width:132px;border:1px solid var(--line-2);border-radius:12px;background:var(--card);padding:8px;display:grid;gap:4px;box-shadow:0 10px 24px -18px rgba(0,0,0,.4)}
+.wf-d .hd{height:8px;width:44%;background:var(--ink-3);opacity:.4;border-radius:2px;margin-bottom:2px}
+.wf-d .ri{display:grid;grid-template-columns:9px 1fr 5px;gap:5px;align-items:center;padding:4px 2px;border-top:1px solid var(--line)}
+.wf-d .ri:first-of-type{border-top:0}
+.wf-d .ri i{display:block;height:3px;width:100%;border-radius:2px;background:var(--line-2)}
+.wf-d .ri .sq{height:7px;width:7px;border-radius:2px;background:var(--line-2)}
+.wf-d .ri .chev{width:4px;height:4px;border-right:1px solid var(--ink-3);border-top:1px solid var(--ink-3);transform:rotate(45deg)}
+
+/* 评分表 */
+.table{margin-top:36px;border:1px solid var(--line);border-radius:14px;overflow-x:auto;overflow-y:hidden}
+table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:680px}
+.thint{display:none;font-size:11.5px;color:var(--ink-3);margin-top:34px}
+th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--paper-2);font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+tr:last-child td{border-bottom:0}
+td b{font-weight:600}
+.good{color:var(--ok)}
+
+/* 推荐 */
+.rec{margin-top:34px;border:1px solid var(--line);border-radius:16px;background:var(--paper-2);padding:24px 26px}
+.rec h2{font-family:var(--serif);font-size:21px;letter-spacing:.2px;margin-bottom:8px}
+.rec p{font-size:13.5px;color:var(--ink-2);line-height:1.9;max-width:790px}
+.rec ol{margin:12px 0 0 18px;font-size:13px;color:var(--ink-2);line-height:1.95}
+.rec .note{font-size:12px;color:var(--ink-3);margin-top:14px;padding-top:12px;border-top:1px dashed var(--line-2)}
+.foot{margin-top:30px;font-size:12px;color:var(--ink-3);display:flex;gap:16px;flex-wrap:wrap}
+.foot a{color:var(--accent-ink)}
+@media (max-width:820px){
+  .grid{grid-template-columns:1fr}
+  .now{grid-template-columns:1fr 1fr}
+  .wrap{padding:28px 16px 60px}
+  .thint{display:block}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="mast">
+    <span class="k">Press Reading Desk · Settings</span>
+    <span class="d">2026-11-04 · 四个方向</span>
+  </div>
+
+  <h1>设置页，不该是一条<br>望不到头的走廊<span class="dot">。</span></h1>
+  <p class="lede">现在的设置页是 <b>6 张卡片一直往下排</b>：桌面 2,718px（约 3 屏），手机 3,640px（约 4.3 屏）。它不算错，但只想改一个字号的用户，也得先滚过 AI 服务、外观、网络、朗读四张卡片。下面四个方向都在回答同一个问题——<b>怎么让「找到某一项」变快，而不丢掉任何一项</b>。</p>
+
+  <div class="now">
+    <div class="bad"><b>2,718</b><span>桌面总高（px · 实测）</span></div>
+    <div class="bad"><b>3,640</b><span>手机总高（px · 实测）</span></div>
+    <div><b>6</b><span>张卡片</span></div>
+    <div><b>15</b><span>个设置项 + 34 个按钮</span></div>
+  </div>
+
+  <div class="grid">
+    <!-- A -->
+    <a class="card" href="a-two-pane.html">
+      <div class="shot">
+        <span class="lab">方案 A</span>
+        <div class="wf wf-a">
+          <div class="side">
+            <div class="nav on"><i></i></div>
+            <div class="nav"><i style="width:64%"></i></div>
+            <div class="nav"><i style="width:76%"></i></div>
+            <div class="nav"><i style="width:58%"></i></div>
+            <div class="nav"><i style="width:70%"></i></div>
+            <div class="nav"><i style="width:52%"></i></div>
+          </div>
+          <div class="main">
+            <div class="box" style="padding:8px">
+              <span class="ln t" style="width:36%"></span>
+              <div class="pillrow"><span class="ln" style="width:56%"></span><span class="pill sel"></span></div>
+              <div class="fld"><span class="imp"></span><span class="ln" style="width:100%"></span></div>
+              <div class="fld"><span class="imp"></span><span class="ln" style="width:100%"></span></div>
+              <div class="pillrow" style="margin-top:2px"><span class="pill" style="width:42px"></span><span class="pill sel" style="width:38px"></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="body">
+        <h2>分类两栏 <span class="tagx">推荐</span></h2>
+        <p>左边 7 个分区，右边一次只显示一个。和侧栏导航同一套心智，点一下就换区，纵向永远只有一屏。</p>
+        <div class="kv"><span>桌面 <b>1 屏</b></span><span>手机 <b>分区下钻</b></span><span>改动 <b>中</b></span></div>
+        <div class="go"><span class="btn primary">打开样稿 →</span></div>
+      </div>
+    </a>
+
+    <!-- B -->
+    <a class="card" href="b-compact.html">
+      <div class="shot">
+        <span class="lab">方案 B</span>
+        <div class="wf wf-b">
+          <div class="search"></div>
+          <div class="g">
+            <span class="ln t" style="width:30%"></span>
+            <div class="r"><span class="ln" style="width:82%"></span><span class="pill"></span></div>
+            <div class="r"><span class="ln" style="width:66%"></span><span class="pill sel"></span></div>
+          </div>
+          <div class="g">
+            <span class="ln t" style="width:24%"></span>
+            <div class="r"><span class="ln" style="width:74%"></span><span class="pill"></span></div>
+            <div class="r"><span class="ln" style="width:58%"></span><span class="pill"></span></div>
+            <div class="r"><span class="ln" style="width:70%"></span><span class="pill sel"></span></div>
+          </div>
+          <div class="g">
+            <span class="ln t" style="width:18%"></span>
+            <div class="r"><span class="ln" style="width:62%"></span><span class="pill"></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="body">
+        <h2>紧凑单页 + 搜索</h2>
+        <p>不动结构，只把「标签在上、控件在下」压成「标签在左、控件在右」，再加一个搜索框和「只看常用」。</p>
+        <div class="kv"><span>桌面 <b>2.0 屏</b></span><span>手机 <b>2.9 屏</b></span><span>改动 <b>小</b></span></div>
+        <div class="go"><span class="btn">打开样稿 →</span></div>
+      </div>
+    </a>
+
+    <!-- C -->
+    <a class="card" href="c-dashboard.html">
+      <div class="shot">
+        <span class="lab">方案 C</span>
+        <div class="wf wf-c">
+          <div class="hero">
+            <div class="l">
+              <span class="ln t" style="width:34%"></span>
+              <span class="ln" style="width:78%"></span>
+              <span class="ln" style="width:64%"></span>
+              <div class="pillrow" style="margin-top:4px"><span class="pill sel"></span><span class="pill"></span></div>
+            </div>
+            <div class="pv"></div>
+          </div>
+          <div class="mini"><span class="ln t" style="width:40%"></span><span class="ln" style="width:84%"></span><span class="ln" style="width:60%"></span></div>
+          <div class="mini"><span class="ln t" style="width:46%"></span><span class="ln" style="width:70%"></span></div>
+          <div class="mini"><span class="ln t" style="width:36%"></span><span class="ln" style="width:78%"></span><span class="ln" style="width:52%"></span></div>
+          <div class="mini"><span class="ln t" style="width:30%"></span><span class="ln" style="width:66%"></span></div>
+        </div>
+      </div>
+      <div class="body">
+        <h2>控制台 + 实时预览</h2>
+        <p>顶部一条状态带说明「现在是什么」，主卡是可直接试的阅读预览（版式/字号/字体/译文立刻变），其余设置收进四张小卡。</p>
+        <div class="kv"><span>桌面 <b>1.3 屏</b></span><span>手机 <b>2.6 屏</b></span><span>改动 <b>中</b></span></div>
+        <div class="go"><span class="btn">打开样稿 →</span></div>
+      </div>
+    </a>
+
+    <!-- D -->
+    <a class="card" href="d-drilldown.html">
+      <div class="shot">
+        <span class="lab">方案 D</span>
+        <div class="wf wf-d">
+          <div class="phone">
+            <div class="hd"></div>
+            <div class="ri"><span class="sq"></span><i style="width:72%"></i><span class="chev"></span></div>
+            <div class="ri"><span class="sq"></span><i style="width:58%"></i><span class="chev"></span></div>
+            <div class="ri"><span class="sq"></span><i style="width:66%"></i><span class="chev"></span></div>
+            <div class="ri"><span class="sq"></span><i style="width:48%"></i><span class="chev"></span></div>
+            <div class="ri"><span class="sq"></span><i style="width:62%"></i><span class="chev"></span></div>
+            <div class="ri"><span class="sq"></span><i style="width:54%"></i><span class="chev"></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="body">
+        <h2>一列 + 抽屉</h2>
+        <p>7 行「当前状态」，点开哪项才拉起哪项的控件。手机上零滚动，抽屉还能做「点完即收」。</p>
+        <div class="kv"><span>桌面 <b>1 屏</b></span><span>手机 <b>1 屏 + 抽屉</b></span><span>改动 <b>较大</b></span></div>
+        <div class="go"><span class="btn">打开样稿 →</span></div>
+      </div>
+    </a>
+  </div>
+
+  <p class="thint">← 表格可左右滑动 →</p>
+  <div class="table">
+    <table>
+      <thead><tr><th>对比</th><th>A 分类两栏</th><th>B 紧凑单页</th><th>C 控制台</th><th>D 一列 + 抽屉</th></tr></thead>
+      <tbody>
+        <tr><td><b>桌面首屏</b></td><td class="good">1 屏</td><td>2.0 屏</td><td class="good">1.3 屏</td><td>1 屏（窄列）</td></tr>
+        <tr><td><b>手机</b></td><td>分区 → 下钻</td><td>2.9 屏</td><td>2.6 屏（单列）</td><td class="good">1 屏 + 抽屉</td></tr>
+        <tr><td><b>找某项</b></td><td>按分类</td><td class="good">搜索 / 常用</td><td>按卡片</td><td>按分类，2 次点击</td></tr>
+        <tr><td><b>最擅长</b></td><td>结构清晰、可持续加项</td><td>改动最小、见效快</td><td>字号/版式不用来回试</td><td>手机 / APK 场景</td></tr>
+        <tr><td><b>代价</b></td><td>要维护分区路由</td><td>条目再多仍会长</td><td>卡片信息密度高</td><td>桌面显得偏窄</td></tr>
+        <tr><td><b>工作量</b></td><td>中（2–3 天）</td><td class="good">小（半天）</td><td>中（2 天）</td><td>较大（3–4 天）</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="rec">
+    <h2>我的建议：A 的骨架 + C 的那块预览</h2>
+    <p>四个方向不是互斥的。设置页真正的痛点是两件事——<b>「太长」</b>和<b>「改完不知道效果」</b>。A 解决前者（一次一屏），C 的主卡解决后者（字号/字体/版式当场可见）。把 C 的预览块嵌进 A 的「阅读体验」分区，就是我认为最终该做的形态：左侧 7 个分区，阅读分区里左右各一半（控件 + 预览）。</p>
+    <ol>
+      <li>第一步先落 A 的结构（分区 + 下钻），把 6 张卡片拆成 7 个分区，控件本身不动；</li>
+      <li>第二步把「阅读体验」做成预览式（C 的主卡），字号/字体/版式/译文四个控件搬到预览旁边；</li>
+      <li>第三步给 AI 分区加「连接状态」徽标，给数据分区加存储用量条——这两项现在完全没有反馈；</li>
+      <li>「帮助」从第六张卡片挪到最后一个分区，内容折叠，不再占首屏。</li>
+    </ol>
+    <p class="note">样稿里的数据都是编的（1.2 MB / 38 篇 / 412 个词），交互是真的：分区能切、抽屉能拉、字号和字体能改预览、右上角能切夜读。直接双击打开即可，不依赖任何服务。</p>
+  </div>
+
+  <div class="foot">
+    <span>打开方式：双击 HTML，或拖进浏览器</span>
+    <a href="a-two-pane.html">A</a><a href="b-compact.html">B</a><a href="c-dashboard.html">C</a><a href="d-drilldown.html">D</a>
+  </div>
+</div>
+</body>
+</html>

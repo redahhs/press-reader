@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>安卓阅读界面 · 四个读法</title>
+<style>
+:root{
+  --paper:#f5f1e8; --card:#fffdf7; --ink:#241f18; --ink-2:#57503f; --ink-3:#7d7565;
+  --line:#e2d9c5; --accent:#b5401f;
+  --serif:"Iowan Old Style",Charter,"Sitka Text",Georgia,"Songti SC",serif;
+  --sans:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei UI",sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans);
+  background-image:radial-gradient(ellipse at 50% -5%, rgba(181,64,31,.05), transparent 55%)}
+.wrap{max-width:1120px; margin:0 auto; padding:56px 28px 90px}
+.k{font-size:10.5px; letter-spacing:3.2px; text-transform:uppercase; color:var(--accent); font-weight:700}
+h1{font-family:var(--serif); font-size:clamp(28px,3.6vw,40px); line-height:1.18; letter-spacing:-.015em; margin:14px 0 0; font-weight:600}
+.lead{font-size:14px; line-height:1.85; color:var(--ink-2); max-width:44em; margin:14px 0 0}
+.lead b{color:var(--ink)}
+
+.grid{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:38px}
+.card{display:flex; flex-direction:column; text-decoration:none; color:inherit; background:var(--card);
+  border:1px solid var(--line); border-radius:16px; overflow:hidden;
+  transition:transform .16s, box-shadow .16s, border-color .16s;
+  box-shadow:0 1px 2px rgba(38,34,28,.04), 0 10px 26px -18px rgba(38,34,28,.4)}
+.card:hover{transform:translateY(-4px); border-color:#cfc3aa; box-shadow:0 4px 10px rgba(38,34,28,.07), 0 28px 50px -22px rgba(38,34,28,.45)}
+.pv{height:190px; position:relative; background:#efe9dc; border-bottom:1px solid var(--line); display:grid; place-items:center; overflow:hidden}
+.phone{width:96px; height:170px; border-radius:12px; background:var(--paper); border:1px solid #d8cfba;
+  box-shadow:0 6px 14px -6px rgba(0,0,0,.25); position:relative; overflow:hidden; padding:7px 6px}
+.phone .l{height:3px; border-radius:2px; background:#ddd2bb; margin-bottom:4px}
+.phone .l.s{height:2px; opacity:.7}
+.phone .l.t{height:5px; background:#cfc3aa; margin-bottom:7px}
+.phone.dark{background:#181410; border-color:#322a20}
+.phone.dark .l{background:#3a3226}
+.phone.dark .l.t{background:#5a4a33}
+
+.meta{padding:15px 15px 17px; flex:1; display:flex; flex-direction:column}
+.meta h2{margin:0; display:flex; align-items:center; font-family:var(--serif); font-size:16.5px; font-weight:600; letter-spacing:-.01em}
+.meta .sub{font-size:11px; letter-spacing:1.4px; text-transform:uppercase; color:var(--ink-3); margin-top:3px}
+.meta p{margin:9px 0 0; font-size:12px; line-height:1.7; color:var(--ink-2)}
+.meta .cost{margin-top:auto; padding-top:12px; font-size:11px; color:var(--ink-3); line-height:1.6}
+.meta .cost b{color:var(--accent); font-weight:600}
+.state{margin-left:auto; font-size:9.5px; letter-spacing:.6px; padding:2px 8px; border-radius:99px; background:#e4ecda; color:#4c7a4c; font-weight:600}
+.go{margin-top:12px; height:34px; border-radius:9px; border:1px solid var(--line); background:transparent;
+  display:grid; place-items:center; font-size:12px; color:var(--ink-2)}
+.card:hover .go{background:var(--ink); color:var(--paper); border-color:var(--ink)}
+
+.note{margin-top:34px; padding:22px 24px; background:var(--card); border:1px solid var(--line);
+  border-left:3px solid var(--accent); border-radius:12px; font-size:13px; line-height:1.9; color:var(--ink-2)}
+.note b{color:var(--ink)}
+.note ol{margin:10px 0 0; padding-left:20px}
+.note li{margin-bottom:7px}
+.foot{margin-top:40px; padding-top:16px; border-top:1px solid var(--line); font-size:11.5px; color:var(--ink-3)}
+
+@media (max-width:960px){ .grid{grid-template-columns:repeat(2,1fr)} }
+@media (max-width:560px){ .grid{grid-template-columns:1fr} .wrap{padding:32px 18px 60px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="k">Press Reader · Android Reading</div>
+  <h1>手机上的四种读法</h1>
+  <p class="lead">
+    同样是这篇文章、同一批生词、同一套交互（点词查义 / 看图译文），只换“手机怎么翻”。
+    <b>在电脑上打开会显示成 390×844 的手机框；在手机上打开就是全屏。</b>
+  </p>
+
+  <div class="grid">
+    <a class="card" href="m1-immersive.html">
+      <div class="pv">
+        <div class="phone">
+          <div class="l t"></div><div class="l"></div><div class="l"></div><div class="l s"></div>
+          <div class="l"></div><div class="l"></div><div class="l s"></div><div class="l"></div><div class="l s"></div>
+          <div style="position:absolute;left:50%;bottom:12px;transform:translateX(-50%);width:54px;height:14px;border-radius:99px;background:#e3dac6;border:1px solid #cfc3aa"></div>
+        </div>
+      </div>
+      <div class="meta">
+        <h2>1 · 沉浸式<span class="state">已落地</span></h2>
+        <div class="sub">Immersive</div>
+        <p>没有工具栏、没有底栏、没有进度条。控件收进底部一颗胶囊，滚动时自动淡出。查词从下方升半屏抽屉。</p>
+        <div class="cost">代价：<b>入口都得摸一次才知道</b>，新手需要一层提示。</div>
+        <div class="go">打开 →</div>
+      </div>
+    </a>
+
+    <a class="card" href="m2-paged.html">
+      <div class="pv">
+        <div class="phone">
+          <div style="display:flex;gap:2px;margin-bottom:10px"><i style="flex:1;height:2px;background:#b5401f;border-radius:2px"></i><i style="flex:1;height:2px;background:#ddd2bb;border-radius:2px"></i><i style="flex:1;height:2px;background:#ddd2bb;border-radius:2px"></i><i style="flex:1;height:2px;background:#ddd2bb;border-radius:2px"></i></div>
+          <div class="l s" style="width:30%;margin-bottom:8px"></div>
+          <div class="l"></div><div class="l"></div><div class="l s"></div><div class="l"></div><div class="l"></div>
+          <div style="position:absolute;left:6px;right:6px;bottom:8px;display:flex;gap:3px">
+            <i style="width:16px;height:12px;border-radius:4px;background:#fffdf7;border:1px solid #ddd2bb"></i>
+            <i style="flex:1;height:12px;border-radius:4px;background:#fffdf7;border:1px solid #ddd2bb"></i>
+            <i style="width:16px;height:12px;border-radius:4px;background:#fffdf7;border:1px solid #ddd2bb"></i>
+          </div>
+        </div>
+      </div>
+      <div class="meta">
+        <h2>2 · 逐段翻页<span class="state">已落地</span></h2>
+        <div class="sub">One paragraph per page</div>
+        <p>一段一屏，上滑恰好停在下一段（scroll-snap）。顶部 8 格进度，底部大号上一段/译文/下一段。</p>
+        <div class="cost">代价：<b>看不到上下文</b>，回查要往回翻。</div>
+        <div class="go">打开 →</div>
+      </div>
+    </a>
+
+    <a class="card" href="m3-night.html">
+      <div class="pv" style="background:#1a1612">
+        <div class="phone dark">
+          <div class="l s" style="width:40%"></div>
+          <div class="l t" style="height:4px;margin-bottom:8px"></div>
+          <div class="l"></div><div class="l"></div><div class="l s"></div><div class="l"></div><div class="l"></div><div class="l s"></div>
+          <div style="position:absolute;left:6px;right:6px;bottom:8px;display:flex;gap:3px">
+            <i style="width:14px;height:14px;border-radius:5px;background:#241d16;border:1px solid #3a3126"></i>
+            <i style="flex:1;height:14px;border-radius:5px;background:#241d16;border:1px solid #3a3126"></i>
+            <i style="width:14px;height:14px;border-radius:5px;background:#241d16;border:1px solid #3a3126"></i>
+          </div>
+        </div>
+      </div>
+      <div class="meta">
+        <h2>3 · 大字<span class="state">已落地</span></h2>
+        <div class="sub">Big type · night</div>
+        <p>20px 字号、行高 1.95，三个 56px 大键全在拇指区。查词就地展开小卡，不盖住下半屏。</p>
+        <div class="cost">代价：<b>一屏信息少</b>，长文翻得久。</div>
+        <div class="go">打开 →</div>
+      </div>
+    </a>
+
+    <a class="card" href="m4-native.html">
+      <div class="pv">
+        <div class="phone">
+          <div class="l s" style="width:50%;margin:0 auto 6px"></div>
+          <div style="display:flex;gap:2px;margin-bottom:7px;background:#e6ddc9;border-radius:4px;padding:2px">
+            <i style="flex:1;height:8px;border-radius:3px;background:#fffdf7"></i>
+            <i style="flex:1;height:8px;border-radius:3px"></i>
+            <i style="flex:1;height:8px;border-radius:3px"></i>
+          </div>
+          <div style="border:1px solid #ddd2bb;border-radius:6px;padding:5px;background:#fffdf7;margin-bottom:5px">
+            <div class="l s" style="margin-bottom:4px"></div><div class="l" style="margin-bottom:3px"></div><div class="l s"></div>
+          </div>
+          <div style="border:1px solid #ddd2bb;border-radius:6px;padding:5px;background:#fffdf7">
+            <div class="l s" style="margin-bottom:4px"></div><div class="l"></div>
+          </div>
+          <div style="position:absolute;left:0;right:0;bottom:0;height:14px;background:#fffdf7;border-top:1px solid #ddd2bb;display:flex;align-items:center;justify-content:space-around">
+            <i style="width:6px;height:6px;border-radius:2px;background:#b5401f"></i><i style="width:6px;height:6px;border-radius:2px;background:#ddd2bb"></i><i style="width:6px;height:6px;border-radius:2px;background:#ddd2bb"></i><i style="width:6px;height:6px;border-radius:2px;background:#ddd2bb"></i>
+          </div>
+        </div>
+      </div>
+      <div class="meta">
+        <h2>4 · 原生 App<span class="state">未采用</span></h2>
+        <div class="sub">Native shell</div>
+        <p>顶栏 + 分段控件（原文/对照/译文）+ 卡片流 + 底部四个 Tab。最保守，也最不需要学习。</p>
+        <div class="cost">代价：<b>最不沉浸</b>，chrome 占了上下各一条。</div>
+        <div class="go">打开 →</div>
+      </div>
+    </a>
+  </div>
+
+  <div class="note">
+    <b>如果是安卓，我会这样组合：</b>
+    <ol>
+      <li><b>日常用 1（沉浸式）</b>——手机阅读最怕上下两条栏，它一件都没有；胶囊在拇指区，单手够得着。</li>
+      <li><b>躺着用 3（大字夜读）</b>——和 1 共用一套内容，只换字号/间距/主题，做成“夜读模式”而不是第四套 UI。</li>
+      <li><b>2（逐段翻页）做成可选</b>：地铁上信号差、注意力碎的时候打开，一段一屏确实更容易“推”下去。</li>
+      <li><b>4（原生 App）不建议做</b>，除非你打算把精读/生词/复习做成三个独立日常入口——那是另一种产品形态。</li>
+    </ol>
+  </div>
+
+  <div class="foot">四个都是单文件、无外部依赖；桌面打开显示为手机框，手机上打开全屏。</div>
+</div>
+</body>
+</html>
